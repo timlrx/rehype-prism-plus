@@ -58,18 +58,20 @@ const rehypePrism = (options) => {
     }
 
     const lang = getLanguage(node)
-    const meta = node.data && node.data.meta ? node.data.meta : ''
-    const shouldHighlightLine = calculateLinesToHighlight(meta)
+    let meta = node.data && node.data.meta ? node.data.meta : ''
 
     if (lang) {
       parent.properties.className = (parent.properties.className || []).concat('language-' + lang)
+      // Add lang to meta to allow line highlighting even when no lang is specified
+      meta = `${lang} ${meta}`
     }
 
+    const shouldHighlightLine = calculateLinesToHighlight(meta)
     const codeLineArray = splitLine(toString(node))
 
     for (const [i, line] of codeLineArray.entries()) {
       // Code lines
-      if (meta.includes('showLineNumbers') || options.showLineNumbers) {
+      if (meta.toLowerCase().includes('showLineNumbers'.toLowerCase()) || options.showLineNumbers) {
         line.properties.line = [(i + 1).toString()]
         line.properties.className = [`${line.properties.className} line-number`]
       }
