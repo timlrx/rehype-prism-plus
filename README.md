@@ -105,7 +105,7 @@ Here's a sample stylesheet:
 .highlight-line {
   margin-left: -16px;
   margin-right: -16px;
-  background-color: rgba(55, 65, 81, 0.5);
+  background-color: rgba(55, 65, 81, 0.5); \\ Highlight color
   border-left-width: 4px;
   border-left-color: rgb(59, 130, 246);
 }
@@ -113,7 +113,7 @@ Here's a sample stylesheet:
 .line-number::before {
   padding-right: 16px;
   margin-left: -8px;
-  color: rgb(156, 163, 175);
+  color: rgb(156, 163, 175);  \\ Line number color
   content: attr(line);
 }
 ```
