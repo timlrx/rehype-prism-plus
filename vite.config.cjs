@@ -5,7 +5,7 @@ module.exports = {
   build: {
     lib: {
       entry: path.resolve(__dirname, 'index.js'),
-      name: 'rehype-prism-plus',
+      name: 'rehype-prism-plus'
     },
-  },
+  }
 }
