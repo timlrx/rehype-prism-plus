@@ -1,8 +1,6 @@
 # rehype-prism-plus
 
-rehype plugin to highlight code blocks in HTML with Prism (via refractor) with line highlighting and line numbers
-
-[rehype](https://github.com/wooorm/rehype) plugin to highlight code blocks in HTML with [Prism] (via [refractor]).
+[rehype](https://github.com/wooorm/rehype) plugin to highlight code blocks in HTML with [Prism] (via [refractor]) with additional line highlighting and line numbers functionalities.
 
 Inspired by and uses a compatible API as [@mapbox/rehype-prism](https://github.com/mapbox/rehype-prism) with additional support for line-highlighting and line numbers.
 
@@ -101,7 +99,7 @@ Here's a sample stylesheet:
   margin-left: -16px;
   margin-right: -16px;
   border-left-width: 4px;
-  border-left-color: rgb(31, 41, 55) \\Code block colour;
+  border-left-color: rgb(31, 41, 55); \\ Set to code block color
 }
 
 .highlight-line {
