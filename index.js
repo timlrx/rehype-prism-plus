@@ -1,8 +1,18 @@
+/**
+ * @typedef {import('unist-util-visit').Node & {properties: Object<any, any>}} Node
+ * @typedef {import('unist-util-visit').Parent & {properties: Object<any, any>}} Parent
+ * @typedef {import('unist-util-visit').Visitor<Node>} Visitor
+ */
+
 import { visit } from 'unist-util-visit'
 import toString from 'hast-util-to-string'
 import { refractor } from 'refractor'
 import rangeParser from 'parse-numeric-range'
 
+/**
+ * @param {Node} node
+ * @return {string|null}
+ */
 const getLanguage = (node) => {
   const className = node.properties.className || []
 
@@ -14,7 +24,12 @@ const getLanguage = (node) => {
   return null
 }
 
-// Create a closure that determines if we have to highlight the given index
+/**
+ * Create a closure that determines if we have to highlight the given index
+ *
+ * @param {string} meta
+ * @return { (index:number) => boolean }
+ */
 const calculateLinesToHighlight = (meta) => {
   const RE = /{([\d,-]+)}/
   if (RE.test(meta)) {
@@ -26,6 +41,12 @@ const calculateLinesToHighlight = (meta) => {
   }
 }
 
+/**
+ * Split line to div node with className `code-line`
+ *
+ * @param {string} text
+ * @return {Node[]}
+ */
 const splitLine = (text) => {
   // Xdm Markdown parser every code line with \n
   const textArray = text.split(/\n/)
@@ -45,6 +66,17 @@ const splitLine = (text) => {
   })
 }
 
+/**
+ * Rehype plugin that highlights code blocks with refractor (prismjs)
+ *
+ * Set `showLineNumbers` to `true` to always display line number
+ *
+ * Set `ignoreMissing` to `true` to ignore unsupported languages and line highlighting when no language is specified
+ *
+ * @typedef {{ showLineNumbers?: boolean, ignoreMissing?: boolean }} RehypePrismOptions
+ * @param {RehypePrismOptions} options
+ * @return {Visitor}
+ */
 const rehypePrism = (options) => {
   options = options || {}
 
@@ -52,12 +84,20 @@ const rehypePrism = (options) => {
     visit(tree, 'element', visitor)
   }
 
+  /**
+   * @param {Node} node
+   * @param {number} index
+   * @param {Parent} parent
+   */
   function visitor(node, index, parent) {
     if (!parent || parent.tagName !== 'pre' || node.tagName !== 'code') {
       return
     }
 
     const lang = getLanguage(node)
+
+    /** @type {string} */
+    // @ts-ignore
     let meta = node.data && node.data.meta ? node.data.meta : ''
 
     if (lang) {

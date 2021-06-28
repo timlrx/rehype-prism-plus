@@ -7,5 +7,7 @@ module.exports = {
       entry: path.resolve(__dirname, 'index.js'),
       name: 'rehype-prism-plus'
     },
+    // do not empty output directory as it contains typescript declarations.
+    emptyOutDir: false,
   }
 }

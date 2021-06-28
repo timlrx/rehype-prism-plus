@@ -1,6 +1,6 @@
 {
   "name": "rehype-prism-plus",
-  "version": "0.0.1-beta.11",
+  "version": "0.0.1",
   "description": "rehype plugin to highlight code blocks in HTML with Prism (via refractor) with line highlighting and line numbers",
   "source": "index.js",
   "files": [
@@ -9,6 +9,7 @@
   "main": "./dist/rehype-prism-plus.umd.js",
   "module": "./dist/rehype-prism-plus.es.js",
   "type": "module",
+  "types": "./dist/index.d.ts",
   "exports": {
     ".": {
       "import": "./dist/rehype-prism-plus.es.js",
@@ -16,7 +17,8 @@
     }
   },
   "scripts": {
-    "build": "vite build --config vite.config.cjs",
+    "build": "tsc -b && vite build --config vite.config.cjs",
+    "tsc": "tsc --watch --noEmit",
     "lint": "eslint .",
     "prettier": "prettier --write '*.js'",
     "test": "uvu"
@@ -54,6 +56,7 @@
     "lint-staged": "^11.0.0",
     "prettier": "^2.3.2",
     "rehype": "^11.0.0",
+    "typescript": "^4.3.4",
     "uvu": "^0.5.1",
     "vite": "^2.3.8"
   },
