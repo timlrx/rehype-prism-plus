@@ -1,0 +1,82 @@
+{
+  "name": "rehype-prism-plus",
+  "version": "0.0.1",
+  "description": "rehype plugin to highlight code blocks in HTML with Prism (via refractor) with line highlighting and line numbers",
+  "source": "index.js",
+  "files": [
+    "dist"
+  ],
+  "main": "./dist/rehype-prism-plus.umd.js",
+  "module": "./dist/rehype-prism-plus.es.js",
+  "type": "module",
+  "exports": {
+    ".": {
+      "import": "./dist/rehype-prism-plus.es.js",
+      "require": "./dist/rehype-prism-plus.umd.js"
+    }
+  },
+  "scripts": {
+    "build": "vite build",
+    "lint": "eslint .",
+    "prettier": "prettier --write '*.js'",
+    "test": "uvu"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/timlrx/rehype-prism-plus.git"
+  },
+  "keywords": [
+    "rehype",
+    "rehype-plugin",
+    "syntax-highlighting",
+    "prism",
+    "mdx",
+    "jsx"
+  ],
+  "author": "Timothy Lin <timothy0336@hotmail.com> (https://timlrx.com)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/timlrx/rehype-prism-plus/issues"
+  },
+  "homepage": "https://github.com/timlrx/rehype-prism-plus#readme",
+  "dependencies": {
+    "hast-util-to-string": "^1.0.4",
+    "parse-numeric-range": "^1.2.0",
+    "refractor": "^4.0.0",
+    "unist-util-visit": "^3.1.0"
+  },
+  "devDependencies": {
+    "dedent": "^0.7.0",
+    "eslint": "^7.29.0",
+    "eslint-config-prettier": "^8.3.0",
+    "eslint-plugin-node": "^11.1.0",
+    "husky": "^4.0.0",
+    "lint-staged": "^11.0.0",
+    "prettier": "^2.3.2",
+    "rehype": "^11.0.0",
+    "uvu": "^0.5.1",
+    "vite": "^2.3.8"
+  },
+  "prettier": {
+    "printWidth": 100,
+    "tabWidth": 2,
+    "useTabs": false,
+    "singleQuote": true,
+    "bracketSpacing": true,
+    "semi": false,
+    "trailingComma": "es5"
+  },
+  "lint-staged": {
+    "*.+(js|jsx|ts|tsx)": [
+      "eslint --fix"
+    ],
+    "*.+(js|jsx|ts|tsx|json|css|md|mdx)": [
+      "prettier --write"
+    ]
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  }
+}
