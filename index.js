@@ -56,12 +56,13 @@ const splitLine = (text) => {
     textArray.pop()
   }
 
+  // Empty array are actually line segments so we convert them back to newlines
   return textArray.map((line) => {
     return {
       type: 'element',
       tagName: 'div',
       properties: { className: ['code-line'] },
-      children: [{ type: 'text', value: line }],
+      children: [{ type: 'text', value: line === '' ? '\n' : line }],
     }
   })
 }
@@ -122,7 +123,7 @@ const rehypePrism = (options) => {
       }
 
       // Syntax highlight
-      if (lang) {
+      if (lang && line.children) {
         try {
           line.children = refractor.highlight(line.children[0].value, lang).children
         } catch (err) {
