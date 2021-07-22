@@ -60,6 +60,23 @@ test('finds code and highlights', () => {
   assert.is(result, expected)
 })
 
+test('respects line spacing', () => {
+  const result = processHtml(dedent`
+<div>
+  <pre><code class="language-py">x
+
+y
+</code></pre>
+</div>
+`).trim()
+  const expected = dedent`
+    <div>
+    <pre class="language-py"><code class="language-py"><div class="code-line">x</div><div class="code-line">\n</div><div class="code-line">y</div></code></pre>
+    </div>
+    `
+  assert.is(result, expected)
+})
+
 test('handles uppercase correctly', () => {
   const result = processHtml(dedent`
     <div>
