@@ -32,8 +32,13 @@ const getLanguage = (node) => {
  */
 const calculateLinesToHighlight = (meta) => {
   const RE = /{([\d,-]+)}/
-  if (RE.test(meta)) {
-    const strlineNumbers = RE.exec(meta)[1]
+  // Remove space between {} e.g. {1, 3}
+  const parsedMeta = meta
+    .split(',')
+    .map((str) => str.trim())
+    .join()
+  if (RE.test(parsedMeta)) {
+    const strlineNumbers = RE.exec(parsedMeta)[1]
     const lineNumbers = rangeParser(strlineNumbers)
     return (index) => lineNumbers.includes(index + 1)
   } else {

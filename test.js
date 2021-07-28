@@ -147,6 +147,26 @@ test('should highlight comma separated lines', async () => {
   assert.is(codeHighlightCount, 2)
 })
 
+test('should should parse ranges with a space in between', async () => {
+  const meta = '{1, 3}'
+  const result = processHtml(
+    dedent`
+    <div>
+      <pre>
+      <code class="language-py">x = 6
+      y = 7 
+      z = 10
+      </code>
+      </pre>
+    </div>
+    `,
+    {},
+    meta
+  ).trim()
+  const codeHighlightCount = (result.match(/<div class="code-line highlight-line">/g) || []).length
+  assert.is(codeHighlightCount, 2)
+})
+
 test('should highlight range separated lines', async () => {
   const meta = '{1-3}'
   const result = processHtml(
