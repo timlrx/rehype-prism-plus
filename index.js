@@ -6,7 +6,7 @@
 
 import { visit } from 'unist-util-visit'
 import toString from 'hast-util-to-string'
-import { refractor } from 'refractor'
+import { refractor } from 'refractor/lib/all.js'
 import rangeParser from 'parse-numeric-range'
 
 /**
