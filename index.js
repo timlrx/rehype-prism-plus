@@ -1,11 +1,11 @@
 /**
- * @typedef {import('unist-util-visit').Node & {properties: Object<any, any>}} Node
- * @typedef {import('unist-util-visit').Parent & {properties: Object<any, any>}} Parent
+ * @typedef {import('unist').Node & {properties: Object<any, any>}} Node
+ * @typedef {import('unist').Parent & {properties: Object<any, any>}} Parent
  * @typedef {import('unist-util-visit').Visitor<Node>} Visitor
  */
 
 import { visit } from 'unist-util-visit'
-import toString from 'hast-util-to-string'
+import { toString } from 'hast-util-to-string'
 import { refractor } from 'refractor/lib/all.js'
 import rangeParser from 'parse-numeric-range'
 
@@ -113,6 +113,7 @@ const rehypePrism = (options) => {
     }
 
     const shouldHighlightLine = calculateLinesToHighlight(meta)
+    // @ts-ignore
     const codeLineArray = splitLine(toString(node))
 
     for (const [i, line] of codeLineArray.entries()) {
