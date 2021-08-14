@@ -1,7 +1,7 @@
 import { test } from 'uvu'
 import * as assert from 'uvu/assert'
 import { visit } from 'unist-util-visit'
-import rehype from 'rehype'
+import { rehype } from 'rehype'
 import dedent from 'dedent'
 import rehypePrism from './index.js'
 
