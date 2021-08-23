@@ -70,9 +70,12 @@ y
 </div>
 `).trim()
   const expected = dedent`
-    <div>
-    <pre class="language-py"><code class="language-py"><div class="code-line">x</div><div class="code-line">\n</div><div class="code-line">y</div></code></pre>
-    </div>
+  <div>
+  <pre class="language-py"><code class="language-py"><div class="code-line">x
+  </div><div class="code-line">
+  </div><div class="code-line">y
+  </div></code></pre>
+  </div>
     `
   assert.is(result, expected)
 })
