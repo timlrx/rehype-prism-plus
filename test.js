@@ -70,9 +70,12 @@ y
 </div>
 `).trim()
   const expected = dedent`
-    <div>
-    <pre class="language-py"><code class="language-py"><div class="code-line">x</div><div class="code-line">\n</div><div class="code-line">y</div></code></pre>
-    </div>
+  <div>
+  <pre class="language-py"><code class="language-py"><div class="code-line">x
+  </div><div class="code-line">
+  </div><div class="code-line">y
+  </div></code></pre>
+  </div>
     `
   assert.is(result, expected)
 })
@@ -265,6 +268,25 @@ test('with options.ignoreMissing, does nothing to code block with fake language-
     { ignoreMissing: true }
   )
   const expected = dedent`<pre class="language-thisisnotalanguage"><code class="language-thisisnotalanguage"><div class="code-line">x = 6</div></code></pre>`
+  assert.is(result, expected)
+})
+
+test('should work with multiline code / comments', () => {
+  const result = processHtml(
+    dedent`
+    <pre><code class="language-js">
+    /**
+     * My comment
+     */
+    </code></pre>
+  `,
+    { ignoreMissing: true }
+  )
+  const expected = dedent`<pre class="language-js"><code class="language-js"><div class="code-line">
+        </div><div class="code-line"><span class="token doc-comment comment">/**
+        </span></div><div class="code-line"><span class="token doc-comment comment"> * My comment
+        </span></div><div class="code-line"><span class="token doc-comment comment"> */</span>
+        </div></code></pre>`
   assert.is(result, expected)
 })
 

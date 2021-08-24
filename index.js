@@ -1,12 +1,23 @@
 /**
- * @typedef {import('unist').Node & {properties: Object<any, any>}} Node
- * @typedef {import('unist').Parent & {properties: Object<any, any>}} Parent
+ * @typedef {import('hast').Node & {properties: Object<any, any>}} Node
+ * @typedef {import('hast').Parent & {properties: Object<any, any>}} Parent
+ * @typedef {import('hast').Root} Root
  * @typedef {import('unist-util-visit').Visitor<Node>} Visitor
+ * @typedef Options options
+ *   Configuration.
+ * @property {boolean} [showLineNumbers]
+ *   Set `showLineNumbers` to `true` to always display line number
+ * @property {boolean} [ignoreMissing]
+ *   Set `ignoreMissing` to `true` to ignore unsupported languages and line highlighting when no language is specified
  */
 
 import { visit } from 'unist-util-visit'
 import { toString } from 'hast-util-to-string'
 import { refractor } from 'refractor/lib/all.js'
+import { toHtml } from 'hast-util-to-html'
+import { filter } from 'unist-util-filter'
+import { unified } from 'unified'
+import parse from 'rehype-parse'
 import rangeParser from 'parse-numeric-range'
 
 /**
@@ -73,20 +84,68 @@ const splitLine = (text) => {
 }
 
 /**
+ * Split line to div node with className `code-line`
+ *
+ * @param {import('refractor').RefractorRoot} ast
+ * @return {Root}
+ */
+const getNodePosition = (ast) => {
+  // @ts-ignore
+  let html = toHtml(ast)
+  const hast = unified().use(parse, { emitParseErrors: true, fragment: true }).parse(html)
+  return hast
+}
+
+/**
+ * Split multiline text nodes into individual nodes with positioning
+ *
+ * @param {Parent['children']} ast
+ * @return {Parent['children']}
+ */
+const splitTextByLine = (ast) => {
+  //@ts-ignore
+  return ast.reduce((result, node) => {
+    if (node.type === 'text') {
+      if (node.value.indexOf('\n') === -1) {
+        result.push(node)
+        return result
+      }
+
+      const lines = node.value.split('\n')
+      for (const [i, line] of lines.entries()) {
+        result.push({
+          type: 'text',
+          value: i === lines.length - 1 ? line : line + '\n',
+          position: {
+            start: { line: node.position.start.line + i },
+            end: { line: node.position.start.line + i },
+          },
+        })
+      }
+
+      return result
+    }
+
+    if (node.children) {
+      // @ts-ignore
+      node.children = splitTextByLine(node.children)
+      result.push(node)
+      return result
+    }
+
+    result.push(node)
+    return result
+  }, [])
+}
+
+/**
  * Rehype plugin that highlights code blocks with refractor (prismjs)
  *
- * Set `showLineNumbers` to `true` to always display line number
- *
- * Set `ignoreMissing` to `true` to ignore unsupported languages and line highlighting when no language is specified
- *
- * @typedef {{ showLineNumbers?: boolean, ignoreMissing?: boolean }} RehypePrismOptions
- * @param {RehypePrismOptions} options
- * @return {Visitor}
+ * @type {import('unified').Plugin<[Options?], Root>}
  */
-const rehypePrism = (options) => {
-  options = options || {}
-
+const rehypePrism = (options = {}) => {
   return (tree) => {
+    // @ts-ignore
     visit(tree, 'element', visitor)
   }
 
@@ -112,6 +171,25 @@ const rehypePrism = (options) => {
       meta = `${lang} ${meta}`
     }
 
+    let refractorRoot
+    let langError = false
+
+    // Syntax highlight
+    if (lang) {
+      try {
+        // @ts-ignore
+        refractorRoot = refractor.highlight(toString(node), lang)
+        refractorRoot = getNodePosition(refractorRoot)
+        refractorRoot.children = splitTextByLine(refractorRoot.children)
+      } catch (err) {
+        if (options.ignoreMissing && /Unknown language/.test(err.message)) {
+          langError = true
+        } else {
+          throw err
+        }
+      }
+    }
+
     const shouldHighlightLine = calculateLinesToHighlight(meta)
     // @ts-ignore
     const codeLineArray = splitLine(toString(node))
@@ -129,16 +207,12 @@ const rehypePrism = (options) => {
       }
 
       // Syntax highlight
-      if (lang && line.children) {
-        try {
-          line.children = refractor.highlight(line.children[0].value, lang).children
-        } catch (err) {
-          // eslint-disable-next-line no-empty
-          if (options.ignoreMissing && /Unknown language/.test(err.message)) {
-          } else {
-            throw err
-          }
-        }
+      if (lang && line.children && !langError) {
+        const treeExtract = filter(
+          refractorRoot,
+          (node) => node.position.start.line <= i + 1 && node.position.end.line >= i + 1
+        )
+        line.children = treeExtract.children
       }
     }
 
