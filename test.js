@@ -271,4 +271,23 @@ test('with options.ignoreMissing, does nothing to code block with fake language-
   assert.is(result, expected)
 })
 
+test('should work with multiline code / comments', () => {
+  const result = processHtml(
+    dedent`
+    <pre><code class="language-js">
+    /**
+     * My comment
+     */
+    </code></pre>
+  `,
+    { ignoreMissing: true }
+  )
+  const expected = dedent`<pre class="language-js"><code class="language-js"><div class="code-line">
+        </div><div class="code-line"><span class="token doc-comment comment">/**
+        </span></div><div class="code-line"><span class="token doc-comment comment"> * My comment
+        </span></div><div class="code-line"><span class="token doc-comment comment"> */</span>
+        </div></code></pre>`
+  assert.is(result, expected)
+})
+
 test.run()
