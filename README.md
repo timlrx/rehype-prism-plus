@@ -1,5 +1,7 @@
 # rehype-prism-plus
 
+![sample-code-block-output](sample-code-block.png)
+
 [rehype](https://github.com/wooorm/rehype) plugin to highlight code blocks in HTML with [Prism] (via [refractor]) with additional line highlighting and line numbers functionalities.
 
 Inspired by and uses a compatible API as [@mapbox/rehype-prism](https://github.com/mapbox/rehype-prism) with additional support for line-highlighting and line numbers.
@@ -91,34 +93,56 @@ HTML Output:
 
 ## Styling
 
-Here's a sample stylesheet:
+To style the language tokens, you can just copy them from any prismjs compatible ones. Here's a list of [themes](https://github.com/PrismJS/prism-themes).
+
+In addition, the following styles should be added for line highlighting and line numbers to work correctly:
 
 ```css
+pre {
+  overflow-x: auto;
+}
+
+/**
+ * Inspired by gatsby remark prism - https://www.gatsbyjs.com/plugins/gatsby-remark-prismjs/
+ * 1. Make the element just wide enough to fit its content.
+ * 2. Always fill the visible space in .code-highlight.
+ */
+.code-highlight {
+  float: left; /* 1 */
+  min-width: 100%; /* 2 */
+}
+
 .code-line {
+  display: block;
   padding-left: 16px;
+  padding-right: 16px;
   margin-left: -16px;
   margin-right: -16px;
   border-left-width: 4px;
-  border-left-color: rgb(31, 41, 55); \\ Set to code block color
+  border-left-color: rgb(31, 41, 55); /* Set code block color */
 }
 
 .highlight-line {
   margin-left: -16px;
   margin-right: -16px;
-  background-color: rgba(55, 65, 81, 0.5); \\ Highlight color
+  background-color: rgba(55, 65, 81, 0.5); /* Set highlight bg color */
   border-left-width: 4px;
-  border-left-color: rgb(59, 130, 246);
+  border-left-color: rgb(59, 130, 246); /* Set highlight accent border color */
 }
 
 .line-number::before {
   padding-right: 16px;
   margin-left: -8px;
-  color: rgb(156, 163, 175);  \\ Line number color
+  color: rgb(156, 163, 175); /* Line number color */
   content: attr(line);
 }
 ```
 
-For styling of language tokens, consult [refractor] and [Prism].
+Here's the styled output using the prism-night-owl theme:
+
+![sample-code-block-output](sample-code-block.png)
+
+For more information on styling of language tokens, consult [refractor] and [Prism].
 
 ## API
 
