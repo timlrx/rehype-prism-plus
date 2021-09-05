@@ -28,19 +28,21 @@ const processHtml = (html, options, metastring) => {
     .toString()
 }
 
-test('copies the language- class to pre tag', () => {
+test('adds a code-highlight class to the code tag', () => {
   const result = processHtml(dedent`
     <pre><code class="language-py"></code></pre>
   `)
-  const expected = dedent`<pre class="language-py"><code class="language-py"></code></pre>`
+  const expected = dedent`<pre><code class="language-py code-highlight"></code></pre>`
   assert.is(result, expected)
 })
 
-test('add div with class code line for each line', () => {
-  const result = processHtml(dedent`
+test('add span with class code line for each line', () => {
+  const result = processHtml(
+    dedent`
     <pre><code>x = 6</code></pre>
-  `)
-  const expected = dedent`<pre><code><div class="code-line">x = 6</div></code></pre>`
+  `
+  )
+  const expected = dedent`<pre><code class="code-highlight"><span class="code-line">x = 6</span></code></pre>`
   assert.is(result, expected)
 })
 
@@ -54,7 +56,7 @@ test('finds code and highlights', () => {
   const expected = dedent`
     <div>
       <p>foo</p>
-      <pre class="language-py"><code class="language-py"><div class="code-line">x <span class="token operator">=</span> <span class="token number">6</span></div></code></pre>
+      <pre><code class="language-py code-highlight"><span class="code-line">x <span class="token operator">=</span> <span class="token number">6</span></span></code></pre>
     </div>
     `
   assert.is(result, expected)
@@ -71,10 +73,10 @@ y
 `).trim()
   const expected = dedent`
   <div>
-  <pre class="language-py"><code class="language-py"><div class="code-line">x
-  </div><div class="code-line">
-  </div><div class="code-line">y
-  </div></code></pre>
+  <pre><code class="language-py code-highlight"><span class="code-line">x
+  </span><span class="code-line">
+  </span><span class="code-line">y
+  </span></code></pre>
   </div>
     `
   assert.is(result, expected)
@@ -90,7 +92,7 @@ test('handles uppercase correctly', () => {
   const expected = dedent`
     <div>
       <p>foo</p>
-      <pre class="language-py"><code class="language-PY"><div class="code-line">x <span class="token operator">=</span> <span class="token number">6</span></div></code></pre>
+      <pre><code class="language-PY code-highlight"><span class="code-line">x <span class="token operator">=</span> <span class="token number">6</span></span></code></pre>
     </div>
     `
   assert.is(result, expected)
@@ -101,13 +103,13 @@ test('each line of code should be a separate div', async () => {
     <div>
       <p>foo</p>
       <pre>
-      <code class="language-py">x = 6
+      <code class="language-py code-highlight">x = 6
       y = 7
       </code>
       </pre>
     </div>
     `).trim()
-  const codeLineCount = (result.match(/<div class="code-line">/g) || []).length
+  const codeLineCount = (result.match(/<span class="code-line">/g) || []).length
   assert.is(codeLineCount, 2)
 })
 
@@ -117,8 +119,8 @@ test('should highlight line', async () => {
     dedent`
     <div>
       <pre>
-      <code class="language-py">x = 6
-      y = 7 
+      <code class="language-py code-highlight">x = 6
+      y = 7
       </code>
       </pre>
     </div>
@@ -126,7 +128,7 @@ test('should highlight line', async () => {
     {},
     meta
   ).trim()
-  const codeHighlightCount = (result.match(/<div class="code-line highlight-line">/g) || []).length
+  const codeHighlightCount = (result.match(/<span class="code-line highlight-line">/g) || []).length
   assert.is(codeHighlightCount, 1)
 })
 
@@ -136,8 +138,8 @@ test('should highlight comma separated lines', async () => {
     dedent`
     <div>
       <pre>
-      <code class="language-py">x = 6
-      y = 7 
+      <code class="language-py code-highlight">x = 6
+      y = 7
       z = 10
       </code>
       </pre>
@@ -146,7 +148,7 @@ test('should highlight comma separated lines', async () => {
     {},
     meta
   ).trim()
-  const codeHighlightCount = (result.match(/<div class="code-line highlight-line">/g) || []).length
+  const codeHighlightCount = (result.match(/<span class="code-line highlight-line">/g) || []).length
   assert.is(codeHighlightCount, 2)
 })
 
@@ -156,8 +158,8 @@ test('should should parse ranges with a space in between', async () => {
     dedent`
     <div>
       <pre>
-      <code class="language-py">x = 6
-      y = 7 
+      <code class="language-py code-highlight">x = 6
+      y = 7
       z = 10
       </code>
       </pre>
@@ -166,7 +168,7 @@ test('should should parse ranges with a space in between', async () => {
     {},
     meta
   ).trim()
-  const codeHighlightCount = (result.match(/<div class="code-line highlight-line">/g) || []).length
+  const codeHighlightCount = (result.match(/<span class="code-line highlight-line">/g) || []).length
   assert.is(codeHighlightCount, 2)
 })
 
@@ -176,8 +178,8 @@ test('should highlight range separated lines', async () => {
     dedent`
     <div>
       <pre>
-      <code class="language-py">x = 6
-      y = 7 
+      <code class="language-py code-highlight">x = 6
+      y = 7
       z = 10
       </code>
       </pre>
@@ -186,7 +188,7 @@ test('should highlight range separated lines', async () => {
     {},
     meta
   ).trim()
-  const codeHighlightCount = (result.match(/<div class="code-line highlight-line">/g) || []).length
+  const codeHighlightCount = (result.match(/<span class="code-line highlight-line">/g) || []).length
   assert.is(codeHighlightCount, 3)
 })
 
@@ -195,7 +197,7 @@ test('showLineNumbers option add line numbers', async () => {
     dedent`
     <div>
       <pre>
-      <code class="language-py">x = 6
+      <code class="language-py code-highlight">x = 6
       y = 7
       </code>
       </pre>
@@ -214,7 +216,7 @@ test('showLineNumbers property works in meta field', async () => {
     dedent`
     <div>
       <pre>
-      <code class="language-py">x = 6
+      <code class="language-py code-highlight">x = 6
       y = 7
       </code>
       </pre>
@@ -235,7 +237,7 @@ test('should support both highlighting and add line number', async () => {
     <div>
       <pre>
       <code class="language-py">x = 6
-      y = 7 
+      y = 7
       z = 10
       </code>
       </pre>
@@ -267,7 +269,7 @@ test('with options.ignoreMissing, does nothing to code block with fake language-
   `,
     { ignoreMissing: true }
   )
-  const expected = dedent`<pre class="language-thisisnotalanguage"><code class="language-thisisnotalanguage"><div class="code-line">x = 6</div></code></pre>`
+  const expected = dedent`<pre><code class="language-thisisnotalanguage code-highlight"><span class="code-line">x = 6</span></code></pre>`
   assert.is(result, expected)
 })
 
@@ -282,11 +284,11 @@ test('should work with multiline code / comments', () => {
   `,
     { ignoreMissing: true }
   )
-  const expected = dedent`<pre class="language-js"><code class="language-js"><div class="code-line">
-        </div><div class="code-line"><span class="token doc-comment comment">/**
-        </span></div><div class="code-line"><span class="token doc-comment comment"> * My comment
-        </span></div><div class="code-line"><span class="token doc-comment comment"> */</span>
-        </div></code></pre>`
+  const expected = dedent`<pre><code class="language-js code-highlight"><span class="code-line">
+        </span><span class="code-line"><span class="token doc-comment comment">/**
+        </span></span><span class="code-line"><span class="token doc-comment comment"> * My comment
+        </span></span><span class="code-line"><span class="token doc-comment comment"> */</span>
+        </span></code></pre>`
   assert.is(result, expected)
 })
 

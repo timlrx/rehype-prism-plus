@@ -76,9 +76,9 @@ const splitLine = (text) => {
   return textArray.map((line) => {
     return {
       type: 'element',
-      tagName: 'div',
+      tagName: 'span',
       properties: { className: ['code-line'] },
-      children: [{ type: 'text', value: line === '' ? '\n' : line }],
+      children: [{ type: 'text', value: line }],
     }
   })
 }
@@ -164,12 +164,8 @@ const rehypePrism = (options = {}) => {
     /** @type {string} */
     // @ts-ignore
     let meta = node.data && node.data.meta ? node.data.meta : ''
-
-    if (lang) {
-      parent.properties.className = (parent.properties.className || []).concat('language-' + lang)
-      // Add lang to meta to allow line highlighting even when no lang is specified
-      meta = `${lang} ${meta}`
-    }
+    node.properties.className = node.properties.className || []
+    node.properties.className.push('code-highlight')
 
     let refractorRoot
     let langError = false
@@ -179,16 +175,21 @@ const rehypePrism = (options = {}) => {
       try {
         // @ts-ignore
         refractorRoot = refractor.highlight(toString(node), lang)
-        refractorRoot = getNodePosition(refractorRoot)
-        refractorRoot.children = splitTextByLine(refractorRoot.children)
       } catch (err) {
         if (options.ignoreMissing && /Unknown language/.test(err.message)) {
           langError = true
+          refractorRoot = node.children
         } else {
           throw err
         }
       }
+    } else {
+      refractorRoot = node.children
     }
+
+    // @ts-ignore
+    refractorRoot = getNodePosition(refractorRoot)
+    refractorRoot.children = splitTextByLine(refractorRoot.children)
 
     const shouldHighlightLine = calculateLinesToHighlight(meta)
     // @ts-ignore
@@ -198,22 +199,20 @@ const rehypePrism = (options = {}) => {
       // Code lines
       if (meta.toLowerCase().includes('showLineNumbers'.toLowerCase()) || options.showLineNumbers) {
         line.properties.line = [(i + 1).toString()]
-        line.properties.className = [`${line.properties.className} line-number`]
+        line.properties.className.push('line-number')
       }
 
       // Line highlight
       if (shouldHighlightLine(i)) {
-        line.properties.className = [`${line.properties.className} highlight-line`]
+        line.properties.className.push('highlight-line')
       }
 
       // Syntax highlight
-      if (lang && line.children && !langError) {
-        const treeExtract = filter(
-          refractorRoot,
-          (node) => node.position.start.line <= i + 1 && node.position.end.line >= i + 1
-        )
-        line.children = treeExtract.children
-      }
+      const treeExtract = filter(
+        refractorRoot,
+        (node) => node.position.start.line <= i + 1 && node.position.end.line >= i + 1
+      )
+      line.children = treeExtract.children
     }
 
     node.children = codeLineArray
