@@ -181,29 +181,6 @@ If you would like to show line numbers for all code blocks, without specifying t
 
 **Note**: This will wrongly assign a language class and the class might appear as `language-{1,3}` or `language-showLineNumbers`, but allow the language highlighting and line number function to work. An possible approach would be to add a placeholder like `unknown` so the `div` will have `class="language-unknown"`
 
-## FAQ
-
-<details>
-  <summary>Why does rehype-prism copy the <code>language-</code> class to the <code>&lt;pre&gt;</code> tag?</summary>
-  
-  [Prism recommends](https://prismjs.com/#basic-usage) adding the `language-` class to the `<code>` tag like this:
-
-```html
-<pre><code class="language-css">p { color: red }</code></pre>
-```
-
-It bases this recommendation on the HTML5 spec. However, an undocumented behavior of their JavaScript is that, in the process of highlighting the code, they also copy the `language-` class to the `<pre>` tag:
-
-```html
-<pre
-  class="language-css"
-><code class="language-css"><span class="token selector">p</span> <span class="token punctuation">{</span> <span class="token property">color</span><span class="token punctuation">:</span> red <span class="token punctuation">}</span></code></pre>
-```
-
-This resulted in many [Prism themes](https://github.com/PrismJS/prism-themes) relying on this behavior by using CSS selectors like `pre[class*="language-"]`. So in order for people using rehype-prism to get the most out of these themes, we decided to do the same.
-
-</details>
-
 [prism]: http://prismjs.com/
 [refractor]: https://github.com/wooorm/refractor
 [xdm]: https://github.com/wooorm/xdm
