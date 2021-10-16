@@ -98,6 +98,8 @@ HTML Output:
 
 To style the language tokens, you can just copy them from any prismjs compatible ones. Here's a list of [themes](https://github.com/PrismJS/prism-themes).
 
+Note that you might have to style the code block yourself as the package does not include a `language-*` class for `pre` blocks.
+
 In addition, the following styles should be added for line highlighting and line numbers to work correctly:
 
 ```css
