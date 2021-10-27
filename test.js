@@ -28,11 +28,11 @@ const processHtml = (html, options, metastring) => {
     .toString()
 }
 
-test('adds a code-highlight class to the code tag', () => {
+test('adds a code-highlight class to the code and pre tag', () => {
   const result = processHtml(dedent`
     <pre><code class="language-py"></code></pre>
   `)
-  const expected = dedent`<pre><code class="language-py code-highlight"></code></pre>`
+  const expected = dedent`<pre class="language-py"><code class="language-py code-highlight"></code></pre>`
   assert.is(result, expected)
 })
 
@@ -56,7 +56,7 @@ test('finds code and highlights', () => {
   const expected = dedent`
     <div>
       <p>foo</p>
-      <pre><code class="language-py code-highlight"><span class="code-line">x <span class="token operator">=</span> <span class="token number">6</span></span></code></pre>
+      <pre class="language-py"><code class="language-py code-highlight"><span class="code-line">x <span class="token operator">=</span> <span class="token number">6</span></span></code></pre>
     </div>
     `
   assert.is(result, expected)
@@ -73,7 +73,7 @@ y
 `).trim()
   const expected = dedent`
   <div>
-  <pre><code class="language-py code-highlight"><span class="code-line">x
+  <pre class="language-py"><code class="language-py code-highlight"><span class="code-line">x
   </span><span class="code-line">
   </span><span class="code-line">y
   </span></code></pre>
@@ -92,7 +92,7 @@ test('handles uppercase correctly', () => {
   const expected = dedent`
     <div>
       <p>foo</p>
-      <pre><code class="language-PY code-highlight"><span class="code-line">x <span class="token operator">=</span> <span class="token number">6</span></span></code></pre>
+      <pre class="language-py"><code class="language-PY code-highlight"><span class="code-line">x <span class="token operator">=</span> <span class="token number">6</span></span></code></pre>
     </div>
     `
   assert.is(result, expected)
@@ -102,7 +102,7 @@ test('each line of code should be a separate div', async () => {
   const result = processHtml(dedent`
     <div>
       <p>foo</p>
-      <pre>
+      <pre class="language-py">
       <code class="language-py code-highlight">x = 6
       y = 7
       </code>
@@ -284,7 +284,7 @@ test('should work with multiline code / comments', () => {
   `,
     { ignoreMissing: true }
   )
-  const expected = dedent`<pre><code class="language-js code-highlight"><span class="code-line">
+  const expected = dedent`<pre class="language-js"><code class="language-js code-highlight"><span class="code-line">
         </span><span class="code-line"><span class="token doc-comment comment">/**
         </span></span><span class="code-line"><span class="token doc-comment comment"> * My comment
         </span></span><span class="code-line"><span class="token doc-comment comment"> */</span>
