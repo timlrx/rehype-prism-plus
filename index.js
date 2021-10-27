@@ -175,6 +175,7 @@ const rehypePrism = (options = {}) => {
       try {
         // @ts-ignore
         refractorRoot = refractor.highlight(toString(node), lang)
+        parent.properties.className = (parent.properties.className || []).concat('language-' + lang)
       } catch (err) {
         if (options.ignoreMissing && /Unknown language/.test(err.message)) {
           langError = true

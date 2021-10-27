@@ -1,6 +1,6 @@
 {
   "name": "rehype-prism-plus",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "rehype plugin to highlight code blocks in HTML with Prism (via refractor) with line highlighting and line numbers",
   "source": "index.js",
   "files": [
@@ -12,8 +12,7 @@
   "type": "module",
   "exports": {
     ".": {
-      "import": "./dist/rehype-prism-plus.es.js",
-      "require": "./dist/rehype-prism-plus.es.js"
+      "import": "./dist/rehype-prism-plus.es.js"
     }
   },
   "scripts": {
