@@ -58,7 +58,7 @@ const calculateLinesToHighlight = (meta) => {
 }
 
 /**
- * Check if we want to start the line numbering from a given number or 0
+ * Check if we want to start the line numbering from a given number or 1
  * showLineNumbers=5, will start the numbering from 5
  * @param {string} meta
  * @returns {number}
@@ -72,7 +72,7 @@ const calculateStartingLine = (meta) => {
     } = RE.exec(meta)
     return Number(lines)
   }
-  return 0
+  return 1
 }
 
 /**
@@ -218,7 +218,7 @@ const rehypePrism = (options = {}) => {
     for (const [i, line] of codeLineArray.entries()) {
       // Code lines
       if (meta.toLowerCase().includes('showLineNumbers'.toLowerCase()) || options.showLineNumbers) {
-        line.properties.line = [(i + (startingLineNumber || 1)).toString()]
+        line.properties.line = [(i + startingLineNumber).toString()]
         line.properties.className.push('line-number')
       }
 
