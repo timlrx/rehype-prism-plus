@@ -98,8 +98,6 @@ HTML Output:
 
 To style the language tokens, you can just copy them from any prismjs compatible ones. Here's a list of [themes](https://github.com/PrismJS/prism-themes).
 
-Note that you might have to style the code block yourself as the package does not include a `language-*` class for `pre` blocks.
-
 In addition, the following styles should be added for line highlighting and line numbers to work correctly:
 
 ```css
@@ -136,7 +134,10 @@ pre {
 }
 
 .line-number::before {
-  padding-right: 16px;
+  display: inline-block;
+  width: 1rem;
+  text-align: right;
+  margin-right: 16px;
   margin-left: -8px;
   color: rgb(156, 163, 175); /* Line number color */
   content: attr(line);
