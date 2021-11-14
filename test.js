@@ -230,6 +230,26 @@ test('showLineNumbers property works in meta field', async () => {
   assert.not(result.match(/line="3"/g))
 })
 
+test('showLineNumbers property with custom index works in meta field', async () => {
+  const meta = 'showLineNumbers=5'
+  const result = processHtml(
+    dedent`
+    <div>
+      <pre>
+      <code class="language-py code-highlight">x = 6
+      y = 7
+      </code>
+      </pre>
+    </div>
+    `,
+    {},
+    meta
+  ).trim()
+  assert.ok(result.match(/line="5"/g))
+  assert.ok(result.match(/line="6"/g))
+  assert.not(result.match(/line="7"/g))
+})
+
 test('should support both highlighting and add line number', async () => {
   const meta = '{1} showLineNumbers'
   const result = processHtml(
