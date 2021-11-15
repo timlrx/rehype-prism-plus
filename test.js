@@ -3,7 +3,7 @@ import * as assert from 'uvu/assert'
 import { visit } from 'unist-util-visit'
 import { rehype } from 'rehype'
 import dedent from 'dedent'
-import rehypePrism from './dist/rehype-prism-plus.es.js'
+import rehypePrism from './index.js'
 
 /**
  * Mock meta in code block
