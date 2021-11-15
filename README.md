@@ -178,7 +178,7 @@ If you would like to silently skip `<code>` elements with invalid languages or s
 Type: `boolean`.
 Default: `false`.
 
-By default, line numbers will only be displayed for code block cells with a meta property that includes 'showLineNumbers'.
+By default, line numbers will only be displayed for code block cells with a meta property that includes 'showLineNumbers'. To control the starting line number use `showLineNumbers=X`, where `X` is the starting line number as a meta property for the code block.
 
 If you would like to show line numbers for all code blocks, without specifying the meta property, set this to `true`.
 
