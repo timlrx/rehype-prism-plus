@@ -58,6 +58,24 @@ const calculateLinesToHighlight = (meta) => {
 }
 
 /**
+ * Check if we want to start the line numbering from a given number or 1
+ * showLineNumbers=5, will start the numbering from 5
+ * @param {string} meta
+ * @returns {number}
+ */
+const calculateStartingLine = (meta) => {
+  const RE = /showLineNumbers=(?<lines>\d+)/i
+  // pick the line number after = using a named capturing group
+  if (RE.test(meta)) {
+    const {
+      groups: { lines },
+    } = RE.exec(meta)
+    return Number(lines)
+  }
+  return 1
+}
+
+/**
  * Split line to div node with className `code-line`
  *
  * @param {string} text
@@ -193,13 +211,14 @@ const rehypePrism = (options = {}) => {
     refractorRoot.children = splitTextByLine(refractorRoot.children)
 
     const shouldHighlightLine = calculateLinesToHighlight(meta)
+    const startingLineNumber = calculateStartingLine(meta)
     // @ts-ignore
     const codeLineArray = splitLine(toString(node))
 
     for (const [i, line] of codeLineArray.entries()) {
       // Code lines
       if (meta.toLowerCase().includes('showLineNumbers'.toLowerCase()) || options.showLineNumbers) {
-        line.properties.line = [(i + 1).toString()]
+        line.properties.line = [(i + startingLineNumber).toString()]
         line.properties.className.push('line-number')
       }
 
