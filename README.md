@@ -6,7 +6,7 @@
 
 Inspired by and uses a compatible API as [@mapbox/rehype-prism](https://github.com/mapbox/rehype-prism) with additional support for line-highlighting and line numbers.
 
-Tested to work with [xdm], MDX compiler.
+Tested to work with [xdm] and mdx v2 libraries such as [mdx-bundler]. If you are using mdx v1 libraries such as [next-mdx-remote], you will need to patch it with the `fixMetaPlugin` discussed in https://github.com/timlrx/rehype-prism-plus/issues/20.
 
 An [appropriate stylesheet](#styling) should be loaded to style the language tokens, format line numbers and highlight lines.
 
@@ -187,4 +187,6 @@ If you would like to show line numbers for all code blocks, without specifying t
 [prism]: http://prismjs.com/
 [refractor]: https://github.com/wooorm/refractor
 [xdm]: https://github.com/wooorm/xdm
+[mdx-bundler]: https://github.com/kentcdodds/mdx-bundler
+[next-mdx-remote]: https://github.com/hashicorp/next-mdx-remote
 [language supported by refractor]: https://github.com/wooorm/refractor#syntaxes
