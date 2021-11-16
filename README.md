@@ -6,7 +6,7 @@
 
 Inspired by and uses a compatible API as [@mapbox/rehype-prism](https://github.com/mapbox/rehype-prism) with additional support for line-highlighting and line numbers.
 
-Tested to work with [xdm] and mdx v2 libraries such as [mdx-bundler]. If you are using mdx v1 libraries such as [next-mdx-remote], you will need to patch it with the `fixMetaPlugin` discussed in https://github.com/timlrx/rehype-prism-plus/issues/20.
+Tested to work with [xdm] and mdx v2 libraries such as [mdx-bundler]. If you are using mdx v1 libraries such as [next-mdx-remote], you will need to patch it with the `fixMetaPlugin` discussed in this [issue](https://github.com/timlrx/rehype-prism-plus/issues/20), before `rehype-prism-plus`.
 
 An [appropriate stylesheet](#styling) should be loaded to style the language tokens, format line numbers and highlight lines.
 
