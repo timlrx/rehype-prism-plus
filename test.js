@@ -312,4 +312,22 @@ test('should work with multiline code / comments', () => {
   assert.is(result, expected)
 })
 
+test('adds inserted or deleted to code-line if lang=diff', async () => {
+  const result = processHtml(
+    dedent`
+    <div>
+      <pre>
+      <code class="language-diff">+ x = 6
+- y = 7
+z = 10
+      </code>
+      </pre>
+    </div>
+    `
+  ).trim()
+  assert.ok(result.includes(`<span class="code-line inserted">`))
+  assert.ok(result.includes(`<span class="code-line deleted">`))
+  assert.ok(result.includes(`<span class="code-line">`))
+})
+
 test.run()
