@@ -122,7 +122,15 @@ pre {
   margin-left: -16px;
   margin-right: -16px;
   border-left-width: 4px;
-  border-left-color: rgb(31, 41, 55); /* Set code block color */
+  border-left-color: rgba(31, 41, 55, 0); /* Set code block color */
+}
+
+.code-line.inserted {
+  background-color: rgba(16, 185, 129, 0.2); /* Set inserted line (+) color */
+}
+
+.code-line.deleted {
+  background-color: rgba(239, 68, 68, 0.2); /* Set deleted line (-) color */
 }
 
 .highlight-line {
@@ -178,7 +186,7 @@ If you would like to silently skip `<code>` elements with invalid languages or s
 Type: `boolean`.
 Default: `false`.
 
-By default, line numbers will only be displayed for code block cells with a meta property that includes 'showLineNumbers'.
+By default, line numbers will only be displayed for code block cells with a meta property that includes 'showLineNumbers'. To control the starting line number use `showLineNumbers=X`, where `X` is the starting line number as a meta property for the code block.
 
 If you would like to show line numbers for all code blocks, without specifying the meta property, set this to `true`.
 

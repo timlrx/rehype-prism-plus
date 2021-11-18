@@ -227,6 +227,14 @@ const rehypePrism = (options = {}) => {
         line.properties.className.push('highlight-line')
       }
 
+      // @ts-ignore
+      if (lang === 'diff' && toString(line).substring(0, 1) === '-') {
+        line.properties.className.push('deleted')
+        // @ts-ignore
+      } else if (lang === 'diff' && toString(line).substring(0, 1) === '+') {
+        line.properties.className.push('inserted')
+      }
+
       // Syntax highlight
       const treeExtract = filter(
         refractorRoot,
