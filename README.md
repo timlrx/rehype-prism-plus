@@ -2,16 +2,13 @@
 
 ![sample-code-block-output](sample-code-block.png)
 
-[rehype](https://github.com/wooorm/rehype) plugin to highlight code blocks in HTML with [Prism] (via [refractor]) with additional line highlighting and line numbers functionalities.
+[rehype] plugin to highlight code blocks in HTML with [Prism] (via [refractor]) with additional line highlighting and line numbers functionalities.
 
 Inspired by and uses a compatible API as [@mapbox/rehype-prism](https://github.com/mapbox/rehype-prism) with additional support for line-highlighting and line numbers.
 
 Tested to work with [xdm] and mdx v2 libraries such as [mdx-bundler]. If you are using mdx v1 libraries such as [next-mdx-remote], you will need to patch it with the `fixMetaPlugin` discussed in this [issue](https://github.com/timlrx/rehype-prism-plus/issues/20), before `rehype-prism-plus`.
 
 An [appropriate stylesheet](#styling) should be loaded to style the language tokens, format line numbers and highlight lines.
-
-**Best suited for usage in Node.**
-If you would like to perform syntax highlighting _in the browser_, you should look into [less heavy ways to use refractor](https://github.com/wooorm/refractor#browser).
 
 ## Installation
 
@@ -24,9 +21,13 @@ npm install rehype-prism-plus
 
 ## Usage
 
-Use this package [as a rehype plugin](https://github.com/rehypejs/rehype/blob/master/doc/plugins.md#using-plugins).
+The following objects are exported:
 
-Some examples of how you might do that:
+- `rehypePrismGenerator`, generator function. Can be used to generate a rehype prism plugin that works on your desired languages.
+- `rehypePrismCommon`, [rehype plugin]. Supports the languages in `refractor/lib/common.js`.
+- `rehypePrism`, [rehype plugin]. Works with all [language supported by refractor].
+
+Some examples of how you might use the rehype plugin:
 
 ```js
 import rehype from 'rehype'
@@ -92,6 +93,19 @@ HTML Output:
     <span class="punctuation">}</span>
   </div></code
 >
+```
+
+## Generating
+
+To customise the languages for your own prism plugin:
+
+```js
+import { refractor } from 'refractor/lib/core.js'
+import markdown from 'refractor/lang/markdown.js'
+import { rehypePrismGenerator } from 'rehype-prism-plus'
+
+refractor.register(markdown)
+const myPrismPlugin = rehypePrismGenerator(refractor)
 ```
 
 ## Styling
@@ -192,8 +206,10 @@ If you would like to show line numbers for all code blocks, without specifying t
 
 **Note**: This will wrongly assign a language class and the class might appear as `language-{1,3}` or `language-showLineNumbers`, but allow the language highlighting and line number function to work. An possible approach would be to add a placeholder like `unknown` so the `div` will have `class="language-unknown"`
 
+[rehype]: https://github.com/wooorm/rehype
 [prism]: http://prismjs.com/
 [refractor]: https://github.com/wooorm/refractor
+[rehype plugin]: https://github.com/rehypejs/rehype/blob/master/doc/plugins.md#using-plugins
 [xdm]: https://github.com/wooorm/xdm
 [mdx-bundler]: https://github.com/kentcdodds/mdx-bundler
 [next-mdx-remote]: https://github.com/hashicorp/next-mdx-remote
