@@ -13,7 +13,8 @@
 
 import { visit } from 'unist-util-visit'
 import { toString } from 'hast-util-to-string'
-import { refractor } from 'refractor/lib/all.js'
+import { refractor as refractorAll } from 'refractor/lib/all.js'
+import { refractor as refractorCommon } from 'refractor/lib/common.js'
 import { toHtml } from 'hast-util-to-html'
 import { filter } from 'unist-util-filter'
 import { unified } from 'unified'
@@ -157,94 +158,124 @@ const splitTextByLine = (ast) => {
 }
 
 /**
- * Rehype plugin that highlights code blocks with refractor (prismjs)
+ * Rehype prism plugin generator that highlights code blocks with refractor (prismjs)
  *
- * @type {import('unified').Plugin<[Options?], Root>}
+ * Pass in your own refractor object with the required languages registered:
+ * https://github.com/wooorm/refractor#refractorregistersyntax
+ *
+ * @param {import('refractor/lib/core').Refractor} refractor
+ * @return {import('unified').Plugin<[Options?], Root>}
  */
-const rehypePrism = (options = {}) => {
-  return (tree) => {
-    // @ts-ignore
-    visit(tree, 'element', visitor)
-  }
-
-  /**
-   * @param {Node} node
-   * @param {number} index
-   * @param {Parent} parent
-   */
-  function visitor(node, index, parent) {
-    if (!parent || parent.tagName !== 'pre' || node.tagName !== 'code') {
-      return
+const rehypePrismGenerator = (refractor) => {
+  return (options = {}) => {
+    return (tree) => {
+      // @ts-ignore
+      visit(tree, 'element', visitor)
     }
 
-    const lang = getLanguage(node)
+    /**
+     * @param {Node} node
+     * @param {number} index
+     * @param {Parent} parent
+     */
+    function visitor(node, index, parent) {
+      if (!parent || parent.tagName !== 'pre' || node.tagName !== 'code') {
+        return
+      }
 
-    /** @type {string} */
-    // @ts-ignore
-    let meta = node.data && node.data.meta ? node.data.meta : ''
-    node.properties.className = node.properties.className || []
-    node.properties.className.push('code-highlight')
+      const lang = getLanguage(node)
 
-    let refractorRoot
-    let langError = false
+      /** @type {string} */
+      // @ts-ignore
+      let meta = node.data && node.data.meta ? node.data.meta : ''
+      node.properties.className = node.properties.className || []
+      node.properties.className.push('code-highlight')
 
-    // Syntax highlight
-    if (lang) {
-      try {
-        // @ts-ignore
-        refractorRoot = refractor.highlight(toString(node), lang)
-        parent.properties.className = (parent.properties.className || []).concat('language-' + lang)
-      } catch (err) {
-        if (options.ignoreMissing && /Unknown language/.test(err.message)) {
-          langError = true
-          refractorRoot = node.children
-        } else {
-          throw err
+      let refractorRoot
+      let langError = false
+
+      // Syntax highlight
+      if (lang) {
+        try {
+          // @ts-ignore
+          refractorRoot = refractor.highlight(toString(node), lang)
+          parent.properties.className = (parent.properties.className || []).concat(
+            'language-' + lang
+          )
+        } catch (err) {
+          if (options.ignoreMissing && /Unknown language/.test(err.message)) {
+            langError = true
+            refractorRoot = node.children
+          } else {
+            throw err
+          }
         }
-      }
-    } else {
-      refractorRoot = node.children
-    }
-
-    // @ts-ignore
-    refractorRoot = getNodePosition(refractorRoot)
-    refractorRoot.children = splitTextByLine(refractorRoot.children)
-
-    const shouldHighlightLine = calculateLinesToHighlight(meta)
-    const startingLineNumber = calculateStartingLine(meta)
-    // @ts-ignore
-    const codeLineArray = splitLine(toString(node))
-
-    for (const [i, line] of codeLineArray.entries()) {
-      // Code lines
-      if (meta.toLowerCase().includes('showLineNumbers'.toLowerCase()) || options.showLineNumbers) {
-        line.properties.line = [(i + startingLineNumber).toString()]
-        line.properties.className.push('line-number')
-      }
-
-      // Line highlight
-      if (shouldHighlightLine(i)) {
-        line.properties.className.push('highlight-line')
+      } else {
+        refractorRoot = node.children
       }
 
       // @ts-ignore
-      if (lang === 'diff' && toString(line).substring(0, 1) === '-') {
-        line.properties.className.push('deleted')
+      refractorRoot = getNodePosition(refractorRoot)
+      refractorRoot.children = splitTextByLine(refractorRoot.children)
+
+      const shouldHighlightLine = calculateLinesToHighlight(meta)
+      const startingLineNumber = calculateStartingLine(meta)
+      // @ts-ignore
+      const codeLineArray = splitLine(toString(node))
+
+      for (const [i, line] of codeLineArray.entries()) {
+        // Code lines
+        if (
+          meta.toLowerCase().includes('showLineNumbers'.toLowerCase()) ||
+          options.showLineNumbers
+        ) {
+          line.properties.line = [(i + startingLineNumber).toString()]
+          line.properties.className.push('line-number')
+        }
+
+        // Line highlight
+        if (shouldHighlightLine(i)) {
+          line.properties.className.push('highlight-line')
+        }
+
         // @ts-ignore
-      } else if (lang === 'diff' && toString(line).substring(0, 1) === '+') {
-        line.properties.className.push('inserted')
+        if (lang === 'diff' && toString(line).substring(0, 1) === '-') {
+          line.properties.className.push('deleted')
+          // @ts-ignore
+        } else if (lang === 'diff' && toString(line).substring(0, 1) === '+') {
+          line.properties.className.push('inserted')
+        }
+
+        // Syntax highlight
+        const treeExtract = filter(
+          refractorRoot,
+          (node) => node.position.start.line <= i + 1 && node.position.end.line >= i + 1
+        )
+        line.children = treeExtract.children
       }
 
-      // Syntax highlight
-      const treeExtract = filter(
-        refractorRoot,
-        (node) => node.position.start.line <= i + 1 && node.position.end.line >= i + 1
-      )
-      line.children = treeExtract.children
+      node.children = codeLineArray
     }
-
-    node.children = codeLineArray
   }
 }
 
+/**
+ * Rehype prism plugin that highlights code blocks with refractor (prismjs)
+ * This supports all the languages and should be used on the server side.
+ *
+ * Consider using rehypePrismCommon or rehypePrismGenerator to generate a plugin
+ * that supports your required languages.
+ */
+const rehypePrism = rehypePrismGenerator(refractorAll)
+
+/**
+ * Rehype prism plugin that highlights code blocks with refractor (prismjs)
+ * Supported languages: https://github.com/wooorm/refractor#data
+ *
+ * Consider using rehypePrismGenerator to generate a plugin
+ * that supports your required languages.
+ */
+const rehypePrismCommon = rehypePrismGenerator(refractorCommon)
+
+export { rehypePrismGenerator, rehypePrismCommon }
 export default rehypePrism
