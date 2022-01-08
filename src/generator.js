@@ -211,10 +211,8 @@ const rehypePrismGenerator = (refractor) => {
         refractorRoot = node.children
       }
 
-      console.dir(refractorRoot, { depth: null })
       // @ts-ignore
       refractorRoot = getNodePosition(refractorRoot)
-      console.dir(refractorRoot, { depth: null })
       refractorRoot.children = splitTextByLine(refractorRoot.children)
 
       const shouldHighlightLine = calculateLinesToHighlight(meta)
