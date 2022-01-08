@@ -157,18 +157,11 @@ const splitTextByLine = (ast) => {
   }, [])
 }
 
-// /**
-//  * Rehype plugin that highlights code blocks with refractor (prismjs)
-//  *
-//  * @type {}
-//  */
-
 /**
-
- */
-
-/**
- * Rehype plugin that highlights code blocks with refractor (prismjs)
+ * Rehype prism plugin generator that highlights code blocks with refractor (prismjs)
+ *
+ * Pass in your own refractor object with the required languages registered:
+ * https://github.com/wooorm/refractor#refractorregistersyntax
  *
  * @param {import('refractor/lib/core').Refractor} refractor
  * @return {import('unified').Plugin<[Options?], Root>}
@@ -266,7 +259,22 @@ const rehypePrismGenerator = (refractor) => {
   }
 }
 
+/**
+ * Rehype prism plugin that highlights code blocks with refractor (prismjs)
+ * This supports all the languages and should be used on the server side.
+ *
+ * Consider using rehypePrismCommon or rehypePrismGenerator to generate a plugin
+ * that supports your required languages.
+ */
 const rehypePrism = rehypePrismGenerator(refractorAll)
+
+/**
+ * Rehype prism plugin that highlights code blocks with refractor (prismjs)
+ * Supported languages: https://github.com/wooorm/refractor#data
+ *
+ * Consider using rehypePrismGenerator to generate a plugin
+ * that supports your required languages.
+ */
 const rehypePrismCommon = rehypePrismGenerator(refractorCommon)
 
 export { rehypePrismGenerator, rehypePrismCommon }
