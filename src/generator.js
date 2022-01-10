@@ -1,6 +1,5 @@
 /**
  * @typedef {import('hast').Element} Element
- * @typedef {import('hast').Parent & {properties: Object<any, any>}} Parent
  * @typedef {import('hast').Root} Root
  * @typedef Options options
  *   Configuration.
@@ -124,7 +123,7 @@ const addNodePositionClosure = () => {
         return result
       }
 
-      if (node.children) {
+      if (Object.prototype.hasOwnProperty.call(node, 'children')) {
         const initialLineNum = startLineNum
         // @ts-ignore
         node.children = addNodePosition(node.children, startLineNum)
@@ -173,7 +172,7 @@ const splitTextByLine = (ast) => {
       return result
     }
 
-    if (node.children) {
+    if (Object.prototype.hasOwnProperty.call(node, 'children')) {
       // @ts-ignore
       node.children = splitTextByLine(node.children)
       result.push(node)
@@ -203,7 +202,7 @@ const rehypePrismGenerator = (refractor) => {
     /**
      * @param {Element} node
      * @param {number} index
-     * @param {Parent} parent
+     * @param {Element} parent
      */
     function visitor(node, index, parent) {
       if (!parent || parent.tagName !== 'pre' || node.tagName !== 'code') {
@@ -233,6 +232,7 @@ const rehypePrismGenerator = (refractor) => {
         try {
           // @ts-ignore
           refractorRoot = refractor.highlight(toString(node), lang)
+          // @ts-ignore className is already an array
           parent.properties.className = (parent.properties.className || []).concat(
             'language-' + lang
           )
@@ -271,7 +271,7 @@ const rehypePrismGenerator = (refractor) => {
           options.showLineNumbers
         ) {
           line.properties.line = [(i + startingLineNumber).toString()]
-          // @ts-ignore className is already an array
+          // @ts-ignore
           line.properties.className.push('line-number')
         }
 
