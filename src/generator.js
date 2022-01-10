@@ -1,6 +1,5 @@
 /**
- * @typedef {import('hast').Node & {properties: Object<any, any>}} Node
- * @typedef {import('hast').Parent & {properties: Object<any, any>}} Parent
+ * @typedef {import('hast').Element} Element
  * @typedef {import('hast').Root} Root
  * @typedef Options options
  *   Configuration.
@@ -12,19 +11,16 @@
 
 import { visit } from 'unist-util-visit'
 import { toString } from 'hast-util-to-string'
-import { toHtml } from 'hast-util-to-html'
 import { filter } from 'unist-util-filter'
-import { unified } from 'unified'
-import parse from 'rehype-parse'
 import rangeParser from 'parse-numeric-range'
 
 /**
- * @param {Node} node
+ * @param {Element} node
  * @return {string|null}
  */
 const getLanguage = (node) => {
-  const className = node.properties.className || []
-
+  const className = node.properties.className
+  //@ts-ignore
   for (const classListItem of className) {
     if (classListItem.slice(0, 9) === 'language-') {
       return classListItem.slice(9).toLowerCase()
@@ -77,10 +73,10 @@ const calculateStartingLine = (meta) => {
  * Split line to div node with className `code-line`
  *
  * @param {string} text
- * @return {Node[]}
+ * @return {Element[]}
  */
 const splitLine = (text) => {
-  // Xdm Markdown parser every code line with \n
+  // Xdm Markdown parses every code line with \n
   const textArray = text.split(/\n/)
 
   // Remove last line \n which results in empty array
@@ -100,23 +96,57 @@ const splitLine = (text) => {
 }
 
 /**
- * Split line to div node with className `code-line`
+ * Add a node start and end line position information for each text node
  *
- * @param {import('refractor').RefractorRoot} ast
- * @return {Root}
+ * @return { (ast:Element['children']) => Element['children'] }
+ *
  */
-const getNodePosition = (ast) => {
-  // @ts-ignore
-  let html = toHtml(ast)
-  const hast = unified().use(parse, { emitParseErrors: true, fragment: true }).parse(html)
-  return hast
+const addNodePositionClosure = () => {
+  let startLineNum = 1
+  /**
+   * @param {Element['children']} ast
+   * @return {Element['children']}
+   */
+  const addNodePosition = (ast) => {
+    // @ts-ignore
+    return ast.reduce((result, node) => {
+      if (node.type === 'text') {
+        const value = /** @type {string} */ (node.value)
+        const numLines = (value.match(/\n/g) || '').length
+        node.position = {
+          // column: 0 is to make the ts compiler happy but we do not use this field
+          start: { line: startLineNum, column: 0 },
+          end: { line: startLineNum + numLines, column: 0 },
+        }
+        startLineNum = startLineNum + numLines
+        result.push(node)
+        return result
+      }
+
+      if (Object.prototype.hasOwnProperty.call(node, 'children')) {
+        const initialLineNum = startLineNum
+        // @ts-ignore
+        node.children = addNodePosition(node.children, startLineNum)
+        result.push(node)
+        node.position = {
+          start: { line: initialLineNum, column: 0 },
+          end: { line: startLineNum, column: 0 },
+        }
+        return result
+      }
+
+      result.push(node)
+      return result
+    }, [])
+  }
+  return addNodePosition
 }
 
 /**
  * Split multiline text nodes into individual nodes with positioning
  *
- * @param {Parent['children']} ast
- * @return {Parent['children']}
+ * @param {Element['children']} ast
+ * @return {Element['children']}
  */
 const splitTextByLine = (ast) => {
   //@ts-ignore
@@ -142,7 +172,7 @@ const splitTextByLine = (ast) => {
       return result
     }
 
-    if (node.children) {
+    if (Object.prototype.hasOwnProperty.call(node, 'children')) {
       // @ts-ignore
       node.children = splitTextByLine(node.children)
       result.push(node)
@@ -166,28 +196,34 @@ const splitTextByLine = (ast) => {
 const rehypePrismGenerator = (refractor) => {
   return (options = {}) => {
     return (tree) => {
-      // @ts-ignore
       visit(tree, 'element', visitor)
     }
 
     /**
-     * @param {Node} node
+     * @param {Element} node
      * @param {number} index
-     * @param {Parent} parent
+     * @param {Element} parent
      */
     function visitor(node, index, parent) {
       if (!parent || parent.tagName !== 'pre' || node.tagName !== 'code') {
         return
       }
 
+      let meta = node.data && node.data.meta ? /** @type {string} */ (node.data.meta) : ''
+      // Coerce className to array
+      if (node.properties.className) {
+        if (typeof node.properties.className === 'boolean') {
+          node.properties.className = []
+        } else if (!Array.isArray(node.properties.className)) {
+          node.properties.className = [node.properties.className]
+        }
+      } else {
+        node.properties.className = []
+      }
+      node.properties.className.push('code-highlight')
       const lang = getLanguage(node)
 
-      /** @type {string} */
-      // @ts-ignore
-      let meta = node.data && node.data.meta ? node.data.meta : ''
-      node.properties.className = node.properties.className || []
-      node.properties.className.push('code-highlight')
-
+      /** @type {Element} */
       let refractorRoot
       let langError = false
 
@@ -196,28 +232,36 @@ const rehypePrismGenerator = (refractor) => {
         try {
           // @ts-ignore
           refractorRoot = refractor.highlight(toString(node), lang)
+          // @ts-ignore className is already an array
           parent.properties.className = (parent.properties.className || []).concat(
             'language-' + lang
           )
         } catch (err) {
           if (options.ignoreMissing && /Unknown language/.test(err.message)) {
             langError = true
-            refractorRoot = node.children
+            refractorRoot = node
           } else {
             throw err
           }
         }
       } else {
-        refractorRoot = node.children
+        refractorRoot = node
       }
 
-      // @ts-ignore
-      refractorRoot = getNodePosition(refractorRoot)
-      refractorRoot.children = splitTextByLine(refractorRoot.children)
+      const nodeWithPosition = addNodePositionClosure()(refractorRoot.children)
+      refractorRoot.children = splitTextByLine(nodeWithPosition)
 
+      if (refractorRoot.children.length > 0) {
+        refractorRoot.position = {
+          start: { line: refractorRoot.children[0].position.start.line, column: 0 },
+          end: {
+            line: refractorRoot.children[refractorRoot.children.length - 1].position.end.line,
+            column: 0,
+          },
+        }
+      }
       const shouldHighlightLine = calculateLinesToHighlight(meta)
       const startingLineNumber = calculateStartingLine(meta)
-      // @ts-ignore
       const codeLineArray = splitLine(toString(node))
 
       for (const [i, line] of codeLineArray.entries()) {
@@ -227,19 +271,21 @@ const rehypePrismGenerator = (refractor) => {
           options.showLineNumbers
         ) {
           line.properties.line = [(i + startingLineNumber).toString()]
+          // @ts-ignore
           line.properties.className.push('line-number')
         }
 
         // Line highlight
         if (shouldHighlightLine(i)) {
+          // @ts-ignore
           line.properties.className.push('highlight-line')
         }
 
-        // @ts-ignore
         if (lang === 'diff' && toString(line).substring(0, 1) === '-') {
-          line.properties.className.push('deleted')
           // @ts-ignore
+          line.properties.className.push('deleted')
         } else if (lang === 'diff' && toString(line).substring(0, 1) === '+') {
+          // @ts-ignore
           line.properties.className.push('inserted')
         }
 

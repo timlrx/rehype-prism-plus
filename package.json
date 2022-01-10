@@ -41,12 +41,10 @@
   },
   "homepage": "https://github.com/timlrx/rehype-prism-plus#readme",
   "dependencies": {
-    "hast-util-to-html": "^8.0.1",
     "hast-util-to-string": "^2.0.0",
     "parse-numeric-range": "^1.3.0",
     "refractor": "^4.4.0",
     "rehype-parse": "^8.0.2",
-    "unified": "^10.1.0",
     "unist-util-filter": "^4.0.0",
     "unist-util-visit": "^4.0.0"
   },
@@ -60,7 +58,8 @@
     "microbundle": "^0.14.1",
     "prettier": "^2.3.2",
     "rehype": "^12.0.0",
-    "typescript": "^4.3.5",
+    "typescript": "4.4.3",
+    "unified": "^10.1.0",
     "uvu": "^0.5.1"
   },
   "prettier": {
