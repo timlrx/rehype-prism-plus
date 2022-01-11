@@ -21,11 +21,12 @@ npm install rehype-prism-plus
 
 ## Usage
 
-The following objects are exported:
+The following import paths are supported:
 
-- `rehypePrismGenerator`, generator function. Can be used to generate a rehype prism plugin that works on your desired languages.
-- `rehypePrismCommon`, [rehype plugin]. Supports the languages in `refractor/lib/common.js`.
-- `rehypePrism`, [rehype plugin]. Works with all [language supported by refractor].
+- `rehype-prism-plus/generator`, generator function. Can be used to generate a rehype prism plugin that works on your desired languages.
+- `rehype-prism-plus/common`, [rehype plugin]. Supports the languages in `refractor/lib/common.js`.
+- `rehype-prism-plus/all`, [rehype plugin]. Works with all [language supported by refractor].
+- `rehype-prism-plus`, re-exports the above 3 packages with `rehype-prism-plus/all` as the default export.
 
 Some examples of how you might use the rehype plugin:
 
@@ -102,7 +103,7 @@ To customise the languages for your own prism plugin:
 ```js
 import { refractor } from 'refractor/lib/core.js'
 import markdown from 'refractor/lang/markdown.js'
-import { rehypePrismGenerator } from 'rehype-prism-plus'
+import rehypePrismGenerator from 'rehype-prism-plus/generator'
 
 refractor.register(markdown)
 const myPrismPlugin = rehypePrismGenerator(refractor)
