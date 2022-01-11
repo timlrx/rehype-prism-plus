@@ -24,8 +24,24 @@
       "import": "./dist/generator.js"
     }
   },
+  "typesVersions": {
+    "*": {
+      ".": [
+        "./dist/index"
+      ],
+      "common": [
+        "./dist/src/common"
+      ],
+      "all": [
+        "./dist/src/all"
+      ],
+      "generator": [
+        "./dist/src/generator"
+      ]
+    }
+  },
   "scripts": {
-    "build": "tsc -b && microbundle index.js src/*.js --format esm",
+    "build": "tsc -b && microbundle index.js src/common.js src/all.js src/generator.js --format esm",
     "tsc": "tsc --watch",
     "lint": "eslint .",
     "prettier": "prettier --write '*.js'",
