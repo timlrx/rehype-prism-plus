@@ -21,7 +21,7 @@
       "import": "./dist/all.js"
     },
     "./generator": {
-      "import": "./dist/generator.js"
+      "import": "./dist/generator.es.js"
     }
   },
   "typesVersions": {
