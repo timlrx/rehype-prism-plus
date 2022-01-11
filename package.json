@@ -13,10 +13,19 @@
   "exports": {
     ".": {
       "import": "./dist/rehype-prism-plus.es.js"
+    },
+    "./common": {
+      "import": "./dist/common.es.js"
+    },
+    "./all": {
+      "import": "./dist/all.js"
+    },
+    "./generator": {
+      "import": "./dist/generator.js"
     }
   },
   "scripts": {
-    "build": "tsc -b && microbundle --format esm",
+    "build": "tsc -b && microbundle index.js src/*.js --format esm",
     "tsc": "tsc --watch",
     "lint": "eslint .",
     "prettier": "prettier --write '*.js'",
