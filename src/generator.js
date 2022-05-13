@@ -263,12 +263,17 @@ const rehypePrismGenerator = (refractor) => {
       const shouldHighlightLine = calculateLinesToHighlight(meta)
       const startingLineNumber = calculateStartingLine(meta)
       const codeLineArray = splitLine(toString(node))
-
+      const falseShowLineNumbersStr = [
+        'showlinenumbers=false',
+        'showlinenumbers="false"',
+        'showlinenumbers={false}',
+      ]
       for (const [i, line] of codeLineArray.entries()) {
         // Code lines
         if (
-          meta.toLowerCase().includes('showLineNumbers'.toLowerCase()) ||
-          options.showLineNumbers
+          (meta.toLowerCase().includes('showLineNumbers'.toLowerCase()) ||
+            options.showLineNumbers) &&
+          !falseShowLineNumbersStr.some((str) => meta.toLowerCase().includes(str))
         ) {
           line.properties.line = [(i + startingLineNumber).toString()]
           // @ts-ignore
