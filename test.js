@@ -210,6 +210,44 @@ test('showLineNumbers option add line numbers', async () => {
   assert.not(result.match(/line="3"/g))
 })
 
+test('not show line number when showLineNumbers=false', async () => {
+  const meta = 'showLineNumbers=false'
+  const result = processHtml(
+    dedent`
+    <div>
+      <pre>
+      <code class="language-py code-highlight">x = 6
+      y = 7
+      </code>
+      </pre>
+    </div>
+    `,
+    { showLineNumbers: true },
+    meta
+  ).trim()
+  assert.not(result.match(/line="1"/g))
+  assert.not(result.match(/line="2"/g))
+})
+
+test('not show line number when showLineNumbers={false}', async () => {
+  const meta = 'showLineNumbers={false}'
+  const result = processHtml(
+    dedent`
+    <div>
+      <pre>
+      <code class="language-py code-highlight">x = 6
+      y = 7
+      </code>
+      </pre>
+    </div>
+    `,
+    { showLineNumbers: true },
+    meta
+  ).trim()
+  assert.not(result.match(/line="1"/g))
+  assert.not(result.match(/line="2"/g))
+})
+
 test('showLineNumbers property works in meta field', async () => {
   const meta = 'showLineNumbers'
   const result = processHtml(
