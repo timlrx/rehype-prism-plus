@@ -89,7 +89,7 @@ const splitLine = (text) => {
     return {
       type: 'element',
       tagName: 'span',
-      properties: { className: ['code-line'] },
+      properties: { className: [] },
       children: [{ type: 'text', value: line }],
     }
   })
@@ -109,7 +109,6 @@ const addNodePositionClosure = () => {
    * @return {Element['children']}
    */
   const addNodePosition = (ast) => {
-    // @ts-ignore
     return ast.reduce((result, node) => {
       if (node.type === 'text') {
         const value = /** @type {string} */ (node.value)
@@ -240,28 +239,28 @@ const rehypePrismGenerator = (refractor) => {
         'showlinenumbers={false}',
       ]
       for (const [i, line] of codeLineArray.entries()) {
-        // Code lines
+        // Default class name for each line
+        line.properties.className = ['code-line']
+
+        // Line number
         if (
           (meta.toLowerCase().includes('showLineNumbers'.toLowerCase()) ||
             options.showLineNumbers) &&
           !falseShowLineNumbersStr.some((str) => meta.toLowerCase().includes(str))
         ) {
           line.properties.line = [(i + startingLineNumber).toString()]
-          // @ts-ignore
           line.properties.className.push('line-number')
         }
 
         // Line highlight
         if (shouldHighlightLine(i)) {
-          // @ts-ignore
           line.properties.className.push('highlight-line')
         }
 
+        // Diff classes
         if (lang === 'diff' && toString(line).substring(0, 1) === '-') {
-          // @ts-ignore
           line.properties.className.push('deleted')
         } else if (lang === 'diff' && toString(line).substring(0, 1) === '+') {
-          // @ts-ignore
           line.properties.className.push('inserted')
         }
 
