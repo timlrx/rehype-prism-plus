@@ -96,6 +96,7 @@ const splitLine = (text) => {
 }
 
 /**
+ * Split multiline text nodes into individual nodes with positioning
  * Add a node start and end line position information for each text node
  *
  * @return { (ast:Element['children']) => Element['children'] }
@@ -113,13 +114,28 @@ const addNodePositionClosure = () => {
       if (node.type === 'text') {
         const value = /** @type {string} */ (node.value)
         const numLines = (value.match(/\n/g) || '').length
-        node.position = {
-          // column: 0 is to make the ts compiler happy but we do not use this field
-          start: { line: startLineNum, column: 0 },
-          end: { line: startLineNum + numLines, column: 0 },
+        if (numLines === 0) {
+          node.position = {
+            // column: 0 is to make the ts compiler happy but we do not use this field
+            start: { line: startLineNum, column: 0 },
+            end: { line: startLineNum, column: 0 },
+          }
+          result.push(node)
+        } else {
+          const lines = value.split('\n')
+          for (const [i, line] of lines.entries()) {
+            result.push({
+              type: 'text',
+              value: i === lines.length - 1 ? line : line + '\n',
+              position: {
+                start: { line: startLineNum + i },
+                end: { line: startLineNum + i },
+              },
+            })
+          }
         }
         startLineNum = startLineNum + numLines
-        result.push(node)
+
         return result
       }
 
@@ -140,48 +156,6 @@ const addNodePositionClosure = () => {
     }, [])
   }
   return addNodePosition
-}
-
-/**
- * Split multiline text nodes into individual nodes with positioning
- *
- * @param {Element['children']} ast
- * @return {Element['children']}
- */
-const splitTextByLine = (ast) => {
-  //@ts-ignore
-  return ast.reduce((result, node) => {
-    if (node.type === 'text') {
-      if (node.value.indexOf('\n') === -1) {
-        result.push(node)
-        return result
-      }
-
-      const lines = node.value.split('\n')
-      for (const [i, line] of lines.entries()) {
-        result.push({
-          type: 'text',
-          value: i === lines.length - 1 ? line : line + '\n',
-          position: {
-            start: { line: node.position.start.line + i },
-            end: { line: node.position.start.line + i },
-          },
-        })
-      }
-
-      return result
-    }
-
-    if (Object.prototype.hasOwnProperty.call(node, 'children')) {
-      // @ts-ignore
-      node.children = splitTextByLine(node.children)
-      result.push(node)
-      return result
-    }
-
-    result.push(node)
-    return result
-  }, [])
 }
 
 /**
@@ -248,8 +222,7 @@ const rehypePrismGenerator = (refractor) => {
         refractorRoot = node
       }
 
-      const nodeWithPosition = addNodePositionClosure()(refractorRoot.children)
-      refractorRoot.children = splitTextByLine(nodeWithPosition)
+      refractorRoot.children = addNodePositionClosure()(refractorRoot.children)
 
       if (refractorRoot.children.length > 0) {
         refractorRoot.position = {
