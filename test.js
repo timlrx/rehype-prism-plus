@@ -2,6 +2,10 @@ import { test } from 'uvu'
 import * as assert from 'uvu/assert'
 import { visit } from 'unist-util-visit'
 import { rehype } from 'rehype'
+import { unified } from 'unified'
+import remarkParse from 'remark-parse'
+import remarkRehype from 'remark-rehype'
+import rehypeStringify from 'rehype-stringify'
 import dedent from 'dedent'
 import rehypePrism from './index.js'
 
@@ -24,6 +28,17 @@ const processHtml = (html, options, metastring) => {
     .data('settings', { fragment: true })
     .use(addMeta, metastring)
     .use(rehypePrism, options)
+    .processSync(html)
+    .toString()
+}
+
+const processHtmlUnified = (html, options, metastring) => {
+  return unified()
+    .use(remarkParse)
+    .use(remarkRehype, {})
+    .use(addMeta, metastring)
+    .use(rehypePrism, options)
+    .use(rehypeStringify)
     .processSync(html)
     .toString()
 }
@@ -366,6 +381,20 @@ z = 10
   assert.ok(result.includes(`<span class="code-line inserted">`))
   assert.ok(result.includes(`<span class="code-line deleted">`))
   assert.ok(result.includes(`<span class="code-line">`))
+})
+
+test('works as a remarkjs / unifiedjs plugin', () => {
+  const result = processHtmlUnified(
+    dedent`
+    ~~~jsx
+    <Component/>
+    ~~~
+  `,
+    { ignoreMissing: true }
+  )
+  const expected = dedent`<pre class="language-jsx"><code class="language-jsx code-highlight"><span class="code-line"><span class="token tag"><span class="token tag"><span class="token punctuation">&#x3C;</span><span class="token class-name">Component</span></span><span class="token punctuation">/></span></span>
+  </span></code></pre>`
+  assert.is(result, expected)
 })
 
 test.run()
