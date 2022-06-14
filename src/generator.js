@@ -199,7 +199,6 @@ const rehypePrismGenerator = (refractor) => {
 
       /** @type {Element} */
       let refractorRoot
-      let langError = false
 
       // Syntax highlight
       if (lang) {
@@ -212,7 +211,6 @@ const rehypePrismGenerator = (refractor) => {
           )
         } catch (err) {
           if (options.ignoreMissing && /Unknown language/.test(err.message)) {
-            langError = true
             refractorRoot = node
           } else {
             throw err
