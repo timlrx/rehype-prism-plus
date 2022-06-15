@@ -70,32 +70,26 @@ const calculateStartingLine = (meta) => {
 }
 
 /**
- * Split line to div node with className `code-line`
+ * Create container AST for node lines
  *
- * @param {string} text
+ * @param {number} number
  * @return {Element[]}
  */
-const splitLine = (text) => {
-  // Xdm Markdown parses every code line with \n
-  const textArray = text.split(/\n/)
-
-  // Remove last line \n which results in empty array
-  if (textArray[textArray.length - 1].trim() === '') {
-    textArray.pop()
-  }
-
-  // Empty array are actually line segments so we convert them back to newlines
-  return textArray.map((line) => {
-    return {
+const createLineNodes = (number) => {
+  const a = new Array(number)
+  for (let i = 0; i < number; i++) {
+    a[i] = {
       type: 'element',
       tagName: 'span',
-      properties: { className: ['code-line'] },
-      children: [{ type: 'text', value: line }],
+      properties: { className: [] },
+      children: [],
     }
-  })
+  }
+  return a
 }
 
 /**
+ * Split multiline text nodes into individual nodes with positioning
  * Add a node start and end line position information for each text node
  *
  * @return { (ast:Element['children']) => Element['children'] }
@@ -108,18 +102,32 @@ const addNodePositionClosure = () => {
    * @return {Element['children']}
    */
   const addNodePosition = (ast) => {
-    // @ts-ignore
     return ast.reduce((result, node) => {
       if (node.type === 'text') {
         const value = /** @type {string} */ (node.value)
         const numLines = (value.match(/\n/g) || '').length
-        node.position = {
-          // column: 0 is to make the ts compiler happy but we do not use this field
-          start: { line: startLineNum, column: 0 },
-          end: { line: startLineNum + numLines, column: 0 },
+        if (numLines === 0) {
+          node.position = {
+            // column: 0 is to make the ts compiler happy but we do not use this field
+            start: { line: startLineNum, column: 0 },
+            end: { line: startLineNum, column: 0 },
+          }
+          result.push(node)
+        } else {
+          const lines = value.split('\n')
+          for (const [i, line] of lines.entries()) {
+            result.push({
+              type: 'text',
+              value: i === lines.length - 1 ? line : line + '\n',
+              position: {
+                start: { line: startLineNum + i },
+                end: { line: startLineNum + i },
+              },
+            })
+          }
         }
         startLineNum = startLineNum + numLines
-        result.push(node)
+
         return result
       }
 
@@ -140,48 +148,6 @@ const addNodePositionClosure = () => {
     }, [])
   }
   return addNodePosition
-}
-
-/**
- * Split multiline text nodes into individual nodes with positioning
- *
- * @param {Element['children']} ast
- * @return {Element['children']}
- */
-const splitTextByLine = (ast) => {
-  //@ts-ignore
-  return ast.reduce((result, node) => {
-    if (node.type === 'text') {
-      if (node.value.indexOf('\n') === -1) {
-        result.push(node)
-        return result
-      }
-
-      const lines = node.value.split('\n')
-      for (const [i, line] of lines.entries()) {
-        result.push({
-          type: 'text',
-          value: i === lines.length - 1 ? line : line + '\n',
-          position: {
-            start: { line: node.position.start.line + i },
-            end: { line: node.position.start.line + i },
-          },
-        })
-      }
-
-      return result
-    }
-
-    if (Object.prototype.hasOwnProperty.call(node, 'children')) {
-      // @ts-ignore
-      node.children = splitTextByLine(node.children)
-      result.push(node)
-      return result
-    }
-
-    result.push(node)
-    return result
-  }, [])
 }
 
 /**
@@ -225,7 +191,6 @@ const rehypePrismGenerator = (refractor) => {
 
       /** @type {Element} */
       let refractorRoot
-      let langError = false
 
       // Syntax highlight
       if (lang) {
@@ -238,7 +203,6 @@ const rehypePrismGenerator = (refractor) => {
           )
         } catch (err) {
           if (options.ignoreMissing && /Unknown language/.test(err.message)) {
-            langError = true
             refractorRoot = node
           } else {
             throw err
@@ -248,9 +212,9 @@ const rehypePrismGenerator = (refractor) => {
         refractorRoot = node
       }
 
-      const nodeWithPosition = addNodePositionClosure()(refractorRoot.children)
-      refractorRoot.children = splitTextByLine(nodeWithPosition)
+      refractorRoot.children = addNodePositionClosure()(refractorRoot.children)
 
+      // Add position info to root
       if (refractorRoot.children.length > 0) {
         refractorRoot.position = {
           start: { line: refractorRoot.children[0].position.start.line, column: 0 },
@@ -259,40 +223,25 @@ const rehypePrismGenerator = (refractor) => {
             column: 0,
           },
         }
+      } else {
+        refractorRoot.position = {
+          start: { line: 0, column: 0 },
+          end: { line: 0, column: 0 },
+        }
       }
+
       const shouldHighlightLine = calculateLinesToHighlight(meta)
       const startingLineNumber = calculateStartingLine(meta)
-      const codeLineArray = splitLine(toString(node))
+      const codeLineArray = createLineNodes(refractorRoot.position.end.line)
+
       const falseShowLineNumbersStr = [
         'showlinenumbers=false',
         'showlinenumbers="false"',
         'showlinenumbers={false}',
       ]
       for (const [i, line] of codeLineArray.entries()) {
-        // Code lines
-        if (
-          (meta.toLowerCase().includes('showLineNumbers'.toLowerCase()) ||
-            options.showLineNumbers) &&
-          !falseShowLineNumbersStr.some((str) => meta.toLowerCase().includes(str))
-        ) {
-          line.properties.line = [(i + startingLineNumber).toString()]
-          // @ts-ignore
-          line.properties.className.push('line-number')
-        }
-
-        // Line highlight
-        if (shouldHighlightLine(i)) {
-          // @ts-ignore
-          line.properties.className.push('highlight-line')
-        }
-
-        if (lang === 'diff' && toString(line).substring(0, 1) === '-') {
-          // @ts-ignore
-          line.properties.className.push('deleted')
-        } else if (lang === 'diff' && toString(line).substring(0, 1) === '+') {
-          // @ts-ignore
-          line.properties.className.push('inserted')
-        }
+        // Default class name for each line
+        line.properties.className = ['code-line']
 
         // Syntax highlight
         const treeExtract = filter(
@@ -300,6 +249,36 @@ const rehypePrismGenerator = (refractor) => {
           (node) => node.position.start.line <= i + 1 && node.position.end.line >= i + 1
         )
         line.children = treeExtract.children
+
+        // Line number
+        if (
+          (meta.toLowerCase().includes('showLineNumbers'.toLowerCase()) ||
+            options.showLineNumbers) &&
+          !falseShowLineNumbersStr.some((str) => meta.toLowerCase().includes(str))
+        ) {
+          line.properties.line = [(i + startingLineNumber).toString()]
+          line.properties.className.push('line-number')
+        }
+
+        // Line highlight
+        if (shouldHighlightLine(i)) {
+          line.properties.className.push('highlight-line')
+        }
+
+        // Diff classes
+        if (lang === 'diff' && toString(line).substring(0, 1) === '-') {
+          line.properties.className.push('deleted')
+        } else if (lang === 'diff' && toString(line).substring(0, 1) === '+') {
+          line.properties.className.push('inserted')
+        }
+      }
+
+      // Remove possible trailing line when splitting by \n which results in empty array
+      if (
+        codeLineArray.length > 0 &&
+        toString(codeLineArray[codeLineArray.length - 1]).trim() === ''
+      ) {
+        codeLineArray.pop()
       }
 
       node.children = codeLineArray
