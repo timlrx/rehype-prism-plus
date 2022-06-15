@@ -70,29 +70,22 @@ const calculateStartingLine = (meta) => {
 }
 
 /**
- * Split line to div node with className `code-line`
+ * Create container AST for node lines
  *
- * @param {string} text
+ * @param {number} number
  * @return {Element[]}
  */
-const splitLine = (text) => {
-  // Xdm Markdown parses every code line with \n
-  const textArray = text.split(/\n/)
-
-  // Remove last line \n which results in empty array
-  if (textArray[textArray.length - 1].trim() === '') {
-    textArray.pop()
-  }
-
-  // Empty array are actually line segments so we convert them back to newlines
-  return textArray.map((line) => {
-    return {
+const createLineNodes = (number) => {
+  const a = new Array(number)
+  for (let i = 0; i < number; i++) {
+    a[i] = {
       type: 'element',
       tagName: 'span',
       properties: { className: [] },
-      children: [{ type: 'text', value: line }],
+      children: [],
     }
-  })
+  }
+  return a
 }
 
 /**
@@ -221,6 +214,7 @@ const rehypePrismGenerator = (refractor) => {
 
       refractorRoot.children = addNodePositionClosure()(refractorRoot.children)
 
+      // Add position info to root
       if (refractorRoot.children.length > 0) {
         refractorRoot.position = {
           start: { line: refractorRoot.children[0].position.start.line, column: 0 },
@@ -229,10 +223,17 @@ const rehypePrismGenerator = (refractor) => {
             column: 0,
           },
         }
+      } else {
+        refractorRoot.position = {
+          start: { line: 0, column: 0 },
+          end: { line: 0, column: 0 },
+        }
       }
+
       const shouldHighlightLine = calculateLinesToHighlight(meta)
       const startingLineNumber = calculateStartingLine(meta)
-      const codeLineArray = splitLine(toString(node))
+      const codeLineArray = createLineNodes(refractorRoot.position.end.line)
+
       const falseShowLineNumbersStr = [
         'showlinenumbers=false',
         'showlinenumbers="false"',
@@ -241,6 +242,13 @@ const rehypePrismGenerator = (refractor) => {
       for (const [i, line] of codeLineArray.entries()) {
         // Default class name for each line
         line.properties.className = ['code-line']
+
+        // Syntax highlight
+        const treeExtract = filter(
+          refractorRoot,
+          (node) => node.position.start.line <= i + 1 && node.position.end.line >= i + 1
+        )
+        line.children = treeExtract.children
 
         // Line number
         if (
@@ -263,13 +271,14 @@ const rehypePrismGenerator = (refractor) => {
         } else if (lang === 'diff' && toString(line).substring(0, 1) === '+') {
           line.properties.className.push('inserted')
         }
+      }
 
-        // Syntax highlight
-        const treeExtract = filter(
-          refractorRoot,
-          (node) => node.position.start.line <= i + 1 && node.position.end.line >= i + 1
-        )
-        line.children = treeExtract.children
+      // Remove possible trailing line when splitting by \n which results in empty array
+      if (
+        codeLineArray.length > 0 &&
+        toString(codeLineArray[codeLineArray.length - 1]).trim() === ''
+      ) {
+        codeLineArray.pop()
       }
 
       node.children = codeLineArray
