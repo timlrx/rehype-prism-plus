@@ -51,6 +51,16 @@ const calculateLinesToHighlight = (meta) => {
   }
 }
 
+const recursivelyStripPositions = (node) => {
+  delete node.position
+
+  if (!node.children || node.children.length === 0) return node
+
+  node.children = node.children.map((x) => recursivelyStripPositions(x))
+
+  return node
+}
+
 /**
  * Check if we want to start the line numbering from a given number or 1
  * showLineNumbers=5, will start the numbering from 5
@@ -282,6 +292,10 @@ const rehypePrismGenerator = (refractor) => {
       }
 
       node.children = codeLineArray
+
+      // Removing remnant positions info as it causes some problems in @next/mdx
+      // https://github.com/timlrx/rehype-prism-plus/issues/44
+      recursivelyStripPositions(node)
     }
   }
 }
