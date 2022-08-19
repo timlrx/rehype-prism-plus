@@ -137,6 +137,7 @@ pre {
   margin-left: -16px;
   margin-right: -16px;
   border-left-width: 4px;
+  border-left-style: solid;
   border-left-color: rgba(31, 41, 55, 0); /* Set code block color */
 }
 
