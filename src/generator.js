@@ -197,8 +197,8 @@ const rehypePrismGenerator = (refractor) => {
       if (lang) {
         try {
           let rootLang
-          if (lang.includes('diff:')){
-            rootLang=lang.split(':')[1]
+          if (lang?.includes('diff-')){
+            rootLang=lang.split('-')[1]
           } else{
             rootLang=lang
           }
@@ -273,9 +273,9 @@ const rehypePrismGenerator = (refractor) => {
         }
 
         // Diff classes
-        if ((lang === 'diff' || lang.includes('diff:')) && toString(line).substring(0, 1) === '-') {
+        if ((lang === 'diff' || lang?.includes('diff-')) && toString(line).substring(0, 1) === '-') {
           line.properties.className.push('deleted')
-        } else if ((lang === 'diff' || lang.includes('diff:')) && toString(line).substring(0, 1) === '+') {
+        } else if ((lang === 'diff' || lang?.includes('diff-')) && toString(line).substring(0, 1) === '+') {
           line.properties.className.push('inserted')
         }
       }
