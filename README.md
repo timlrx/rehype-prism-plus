@@ -136,8 +136,7 @@ pre {
   padding-right: 16px;
   margin-left: -16px;
   margin-right: -16px;
-  border-left-width: 4px;
-  border-left-color: rgba(31, 41, 55, 0); /* Set code block color */
+  border-left: 4px solid rgba(0, 0, 0, 0); /* Set placeholder for highlight accent border color to transparent */
 }
 
 .code-line.inserted {
@@ -152,8 +151,7 @@ pre {
   margin-left: -16px;
   margin-right: -16px;
   background-color: rgba(55, 65, 81, 0.5); /* Set highlight bg color */
-  border-left-width: 4px;
-  border-left-color: rgb(59, 130, 246); /* Set highlight accent border color */
+  border-left: 4px solid rgb(59, 130, 246); /* Set highlight accent border color */
 }
 
 .line-number::before {
