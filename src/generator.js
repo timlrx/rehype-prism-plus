@@ -51,16 +51,6 @@ const calculateLinesToHighlight = (meta) => {
   }
 }
 
-const recursivelyStripPositions = (node) => {
-  delete node.position
-
-  if (!node.children || node.children.length === 0) return node
-
-  node.children = node.children.map((x) => recursivelyStripPositions(x))
-
-  return node
-}
-
 /**
  * Check if we want to start the line numbering from a given number or 1
  * showLineNumbers=5, will start the numbering from 5
@@ -118,9 +108,10 @@ const addNodePositionClosure = () => {
         const numLines = (value.match(/\n/g) || '').length
         if (numLines === 0) {
           node.position = {
-            // column: 0 is to make the ts compiler happy but we do not use this field
-            start: { line: startLineNum, column: 0 },
-            end: { line: startLineNum, column: 0 },
+            // column: 1 is needed to avoid error with @next/mdx
+            // https://github.com/timlrx/rehype-prism-plus/issues/44
+            start: { line: startLineNum, column: 1 },
+            end: { line: startLineNum, column: 1 },
           }
           result.push(node)
         } else {
@@ -130,8 +121,8 @@ const addNodePositionClosure = () => {
               type: 'text',
               value: i === lines.length - 1 ? line : line + '\n',
               position: {
-                start: { line: startLineNum + i },
-                end: { line: startLineNum + i },
+                start: { line: startLineNum + i, column: 1 },
+                end: { line: startLineNum + i, column: 1 },
               },
             })
           }
@@ -147,8 +138,8 @@ const addNodePositionClosure = () => {
         node.children = addNodePosition(node.children, startLineNum)
         result.push(node)
         node.position = {
-          start: { line: initialLineNum, column: 0 },
-          end: { line: startLineNum, column: 0 },
+          start: { line: initialLineNum, column: 1 },
+          end: { line: startLineNum, column: 1 },
         }
         return result
       }
@@ -292,10 +283,6 @@ const rehypePrismGenerator = (refractor) => {
       }
 
       node.children = codeLineArray
-
-      // Removing remnant positions info as it causes some problems in @next/mdx
-      // https://github.com/timlrx/rehype-prism-plus/issues/44
-      recursivelyStripPositions(node)
     }
   }
 }
