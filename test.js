@@ -397,4 +397,22 @@ test('works as a remarkjs / unifiedjs plugin', () => {
   assert.is(result, expected)
 })
 
+test('diff and code highlighting should work together', () => {
+  const result = processHtml(
+    dedent`
+    <pre><code class="language-diff-css">
+    .hello{
+    - background:url('./urel.png');
+    + background-image:url('./urel.png');
+    }
+    </code></pre>
+  `,
+    { ignoreMissing: true }
+  )
+  assert.ok(result.includes(`<pre class="language-css">`))
+  assert.ok(result.includes(`<span class="code-line inserted">`))
+  assert.ok(result.includes(`<span class="code-line deleted">`))
+  assert.ok(result.includes(`<span class="code-line">`))
+})
+
 test.run()

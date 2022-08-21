@@ -196,11 +196,17 @@ const rehypePrismGenerator = (refractor) => {
       // Syntax highlight
       if (lang) {
         try {
+          let rootLang
+          if (lang?.includes('diff-')){
+            rootLang=lang.split('-')[1]
+          } else{
+            rootLang=lang
+          }
           // @ts-ignore
-          refractorRoot = refractor.highlight(toString(node), lang)
+          refractorRoot = refractor.highlight(toString(node), rootLang)
           // @ts-ignore className is already an array
           parent.properties.className = (parent.properties.className || []).concat(
-            'language-' + lang
+            'language-' + rootLang
           )
         } catch (err) {
           if (options.ignoreMissing && /Unknown language/.test(err.message)) {
@@ -267,9 +273,9 @@ const rehypePrismGenerator = (refractor) => {
         }
 
         // Diff classes
-        if (lang === 'diff' && toString(line).substring(0, 1) === '-') {
+        if ((lang === 'diff' || lang?.includes('diff-')) && toString(line).substring(0, 1) === '-') {
           line.properties.className.push('deleted')
-        } else if (lang === 'diff' && toString(line).substring(0, 1) === '+') {
+        } else if ((lang === 'diff' || lang?.includes('diff-')) && toString(line).substring(0, 1) === '+') {
           line.properties.className.push('inserted')
         }
       }
