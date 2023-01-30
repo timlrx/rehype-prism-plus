@@ -176,7 +176,7 @@ const rehypePrismGenerator = (refractor) => {
         return
       }
 
-      let meta = node.data && node.data.meta ? /** @type {string} */ (node.data.meta) : ''
+      let meta = /** @type {string} */ (node?.data?.meta || node?.properties?.metastring || '')
       // Coerce className to array
       if (node.properties.className) {
         if (typeof node.properties.className === 'boolean') {
