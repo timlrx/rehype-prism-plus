@@ -357,6 +357,19 @@ test('with options.defaultLanguage, it adds the correct language class tag', () 
   assert.is(result, expected)
 })
 
+test('throws error if options.defaultLanguage is not registered with refractor', () => {
+  assert.throws(
+    () =>
+      processHtml(
+        dedent`
+    <pre><code>x = 6</code></pre>
+  `,
+        { defaultLanguage: 'pyzqt' }
+      ),
+    /"pyzqt" is not registered with refractor/
+  )
+})
+
 test('should work with multiline code / comments', () => {
   const result = processHtml(
     dedent`

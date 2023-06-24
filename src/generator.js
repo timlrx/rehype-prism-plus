@@ -16,11 +16,8 @@ import { visit } from 'unist-util-visit'
 import { toString } from 'hast-util-to-string'
 import { filter } from 'unist-util-filter'
 import rangeParser from 'parse-numeric-range'
+import { refractor } from 'refractor'
 
-/**
- * @param {Element} node
- * @return {string|null}
- */
 const getLanguage = (node) => {
   const className = node.properties.className
   //@ts-ignore
@@ -30,6 +27,17 @@ const getLanguage = (node) => {
     }
   }
   return null
+}
+
+/**
+ * @param {import('refractor/lib/core').Refractor} refractor
+ * @param {string} defaultLanguage
+ * @return {void}
+ */
+const checkIfLanguageIsRegistered = (refractor, defaultLanguage) => {
+  if (defaultLanguage && !refractor.registered(defaultLanguage)) {
+    throw new Error(`The default language "${defaultLanguage}" is not registered with refractor.`)
+  }
 }
 
 /**
@@ -165,6 +173,7 @@ const addNodePositionClosure = () => {
  */
 const rehypePrismGenerator = (refractor) => {
   return (options = {}) => {
+    checkIfLanguageIsRegistered(refractor, options.defaultLanguage)
     return (tree) => {
       visit(tree, 'element', visitor)
     }
