@@ -16,7 +16,6 @@ import { visit } from 'unist-util-visit'
 import { toString } from 'hast-util-to-string'
 import { filter } from 'unist-util-filter'
 import rangeParser from 'parse-numeric-range'
-import { refractor } from 'refractor'
 
 const getLanguage = (node) => {
   const className = node.properties.className
