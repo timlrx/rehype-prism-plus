@@ -194,6 +194,15 @@ By default, if `{name}` does not correspond to a [language supported by refracto
 
 If you would like to silently skip `<code>` elements with invalid languages or support line numbers and line highlighting for code blocks without a specified language, set this option to `true`.
 
+#### options.defaultLanguage
+
+Type: `string`.
+Default: ``.
+
+Uses the specified language as the default if none is specified. Takes precedence over `ignoreMissing`.
+
+Note: The language must be first registered with [refractor].
+
 #### options.showLineNumbers
 
 Type: `boolean`.
