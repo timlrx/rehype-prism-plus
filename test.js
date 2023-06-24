@@ -346,6 +346,30 @@ test('with options.ignoreMissing, does nothing to code block with fake language-
   assert.is(result, expected)
 })
 
+test('with options.defaultLanguage, it adds the correct language class tag', () => {
+  const result = processHtml(
+    dedent`
+    <pre><code>x = 6</code></pre>
+  `,
+    { defaultLanguage: 'py' }
+  )
+  const expected = dedent`<pre class="language-py"><code class="code-highlight"><span class="code-line">x <span class="token operator">=</span> <span class="token number">6</span></span></code></pre>`
+  assert.is(result, expected)
+})
+
+test('throws error if options.defaultLanguage is not registered with refractor', () => {
+  assert.throws(
+    () =>
+      processHtml(
+        dedent`
+    <pre><code>x = 6</code></pre>
+  `,
+        { defaultLanguage: 'pyzqt' }
+      ),
+    /"pyzqt" is not registered with refractor/
+  )
+})
+
 test('should work with multiline code / comments', () => {
   const result = processHtml(
     dedent`

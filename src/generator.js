@@ -7,6 +7,9 @@
  *   Set `showLineNumbers` to `true` to always display line number
  * @property {boolean} [ignoreMissing]
  *   Set `ignoreMissing` to `true` to ignore unsupported languages and line highlighting when no language is specified
+ * @property {string} [defaultLanguage]
+ *   Uses the specified language as the default if none is specified. Takes precedence over `ignoreMissing`.
+ *   Note: The language must be registered with refractor.
  */
 
 import { visit } from 'unist-util-visit'
@@ -14,10 +17,6 @@ import { toString } from 'hast-util-to-string'
 import { filter } from 'unist-util-filter'
 import rangeParser from 'parse-numeric-range'
 
-/**
- * @param {Element} node
- * @return {string|null}
- */
 const getLanguage = (node) => {
   const className = node.properties.className
   //@ts-ignore
@@ -27,6 +26,17 @@ const getLanguage = (node) => {
     }
   }
   return null
+}
+
+/**
+ * @param {import('refractor/lib/core').Refractor} refractor
+ * @param {string} defaultLanguage
+ * @return {void}
+ */
+const checkIfLanguageIsRegistered = (refractor, defaultLanguage) => {
+  if (defaultLanguage && !refractor.registered(defaultLanguage)) {
+    throw new Error(`The default language "${defaultLanguage}" is not registered with refractor.`)
+  }
 }
 
 /**
@@ -162,6 +172,7 @@ const addNodePositionClosure = () => {
  */
 const rehypePrismGenerator = (refractor) => {
   return (options = {}) => {
+    checkIfLanguageIsRegistered(refractor, options.defaultLanguage)
     return (tree) => {
       visit(tree, 'element', visitor)
     }
@@ -188,7 +199,7 @@ const rehypePrismGenerator = (refractor) => {
         node.properties.className = []
       }
       node.properties.className.push('code-highlight')
-      const lang = getLanguage(node)
+      const lang = getLanguage(node) || options.defaultLanguage
 
       /** @type {Element} */
       let refractorRoot
@@ -197,10 +208,10 @@ const rehypePrismGenerator = (refractor) => {
       if (lang) {
         try {
           let rootLang
-          if (lang?.includes('diff-')){
-            rootLang=lang.split('-')[1]
-          } else{
-            rootLang=lang
+          if (lang?.includes('diff-')) {
+            rootLang = lang.split('-')[1]
+          } else {
+            rootLang = lang
           }
           // @ts-ignore
           refractorRoot = refractor.highlight(toString(node), rootLang)
@@ -273,9 +284,15 @@ const rehypePrismGenerator = (refractor) => {
         }
 
         // Diff classes
-        if ((lang === 'diff' || lang?.includes('diff-')) && toString(line).substring(0, 1) === '-') {
+        if (
+          (lang === 'diff' || lang?.includes('diff-')) &&
+          toString(line).substring(0, 1) === '-'
+        ) {
           line.properties.className.push('deleted')
-        } else if ((lang === 'diff' || lang?.includes('diff-')) && toString(line).substring(0, 1) === '+') {
+        } else if (
+          (lang === 'diff' || lang?.includes('diff-')) &&
+          toString(line).substring(0, 1) === '+'
+        ) {
           line.properties.className.push('inserted')
         }
       }
