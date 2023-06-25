@@ -198,8 +198,14 @@ const rehypePrismGenerator = (refractor) => {
       } else {
         node.properties.className = []
       }
+
+      let lang = getLanguage(node)
+      // If no language is set on the code block, use defaultLanguage if specified
+      if (!lang && options.defaultLanguage) {
+        lang = options.defaultLanguage
+        node.properties.className.push(`language-${lang}`)
+      }
       node.properties.className.push('code-highlight')
-      const lang = getLanguage(node) || options.defaultLanguage
 
       /** @type {Element} */
       let refractorRoot
