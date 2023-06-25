@@ -353,8 +353,23 @@ test('with options.defaultLanguage, it adds the correct language class tag', () 
   `,
     { defaultLanguage: 'py' }
   )
-  const expected = dedent`<pre class="language-py"><code class="code-highlight"><span class="code-line">x <span class="token operator">=</span> <span class="token number">6</span></span></code></pre>`
+  const expected = dedent`<pre class="language-py"><code class="language-py code-highlight"><span class="code-line">x <span class="token operator">=</span> <span class="token number">6</span></span></code></pre>`
   assert.is(result, expected)
+})
+
+test('defaultLanguage should produce the same syntax tree as if manually specified', () => {
+  const resultDefaultLanguage = processHtml(
+    dedent`
+    <pre><code>x = 6</code></pre>
+  `,
+    { defaultLanguage: 'py' }
+  )
+  const resultManuallySpecified = processHtml(
+    dedent`
+    <pre><code class="language-py">x = 6</code></pre>
+  `
+  )
+  assert.is(resultDefaultLanguage, resultManuallySpecified)
 })
 
 test('throws error if options.defaultLanguage is not registered with refractor', () => {
