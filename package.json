@@ -11,10 +11,22 @@
   "types": "./dist/index.d.ts",
   "type": "module",
   "exports": {
-    ".": "./dist/rehype-prism-plus.es.js",
-    "./common": "./dist/common.es.js",
-    "./all": "./dist/all.js",
-    "./generator": "./dist/generator.es.js"
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/rehype-prism-plus.es.js"
+    },
+    "./common": {
+      "types": "./dist/src/common.d.ts",
+      "import": "./dist/common.es.js"
+    },
+    "./all": {
+      "types": "./dist/src/all.d.ts",
+      "import": "./dist/all.es.js"
+    },
+    "./generator": {
+      "types": "./dist/src/generator.d.ts",
+      "import": "./dist/generator.es.js"
+    }
   },
   "typesVersions": {
     "*": {
