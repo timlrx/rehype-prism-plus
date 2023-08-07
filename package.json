@@ -6,26 +6,26 @@
   "files": [
     "dist"
   ],
-  "main": "./dist/rehype-prism-plus.es.js",
-  "module": "./dist/rehype-prism-plus.es.js",
+  "main": "./dist/index.es.js",
+  "module": "./dist/index.es.js",
   "types": "./dist/index.d.ts",
   "type": "module",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "import": "./dist/rehype-prism-plus.es.js"
+      "default": "./dist/index.es.js"
     },
     "./common": {
-      "types": "./dist/src/common.d.ts",
-      "import": "./dist/common.es.js"
+      "types": "./dist/common.d.ts",
+      "default": "./dist/common.es.js"
     },
     "./all": {
-      "types": "./dist/src/all.d.ts",
-      "import": "./dist/all.es.js"
+      "types": "./dist/all.d.ts",
+      "default": "./dist/all.es.js"
     },
     "./generator": {
-      "types": "./dist/src/generator.d.ts",
-      "import": "./dist/generator.es.js"
+      "types": "./dist/generator.d.ts",
+      "default": "./dist/generator.es.js"
     }
   },
   "typesVersions": {
@@ -34,18 +34,18 @@
         "./dist/index"
       ],
       "common": [
-        "./dist/src/common"
+        "./dist/common"
       ],
       "all": [
-        "./dist/src/all"
+        "./dist/all"
       ],
       "generator": [
-        "./dist/src/generator"
+        "./dist/generator"
       ]
     }
   },
   "scripts": {
-    "build": "tsc -b && microbundle index.js src/common.js src/all.js src/generator.js --format esm",
+    "build": "tsc -b && microbundle src/index.js src/common.js src/all.js src/generator.js --format esm",
     "tsc": "tsc --watch",
     "lint": "eslint .",
     "prettier": "prettier --write '*.js'",
