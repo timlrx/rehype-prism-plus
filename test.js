@@ -7,7 +7,7 @@ import remarkParse from 'remark-parse'
 import remarkRehype from 'remark-rehype'
 import rehypeStringify from 'rehype-stringify'
 import dedent from 'dedent'
-import rehypePrism from './index.js'
+import rehypePrism from './src/index.js'
 
 /**
  * Mock meta in code block
