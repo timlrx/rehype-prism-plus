@@ -187,6 +187,7 @@ const rehypePrismGenerator = (refractor) => {
         return
       }
 
+      // @ts-ignore meta is a custom code block property
       let meta = /** @type {string} */ (node?.data?.meta || node?.properties?.metastring || '')
       // Coerce className to array
       if (node.properties.className) {
