@@ -205,14 +205,16 @@ Note: The language must be first registered with [refractor].
 
 #### options.showLineNumbers
 
-Type: `boolean`.
-Default: `false`.
+Type: `boolean | string[]`  
+Default: `false`
 
-By default, line numbers will only be displayed for code block cells with a meta property that includes 'showLineNumbers'. To control the starting line number use `showLineNumbers=X`, where `X` is the starting line number as a meta property for the code block.
+By default, line numbers will only be displayed for code block cells with a meta property that includes 'showLineNumbers'. To control the starting line number, use `showLineNumbers=X`, where `X` is the starting line number as a meta property for the code block.
 
-If you would like to show line numbers for all code blocks, without specifying the meta property, set this to `true`.
+If you would like to show line numbers for all code blocks without specifying the meta property, set this to `true`.
 
-**Note**: This will wrongly assign a language class and the class might appear as `language-{1,3}` or `language-showLineNumbers`, but allow the language highlighting and line number function to work. An possible approach would be to add a placeholder like `unknown` so the `div` will have `class="language-unknown"`
+Alternatively, you can specify an array of languages for which the line numbers should be shown. For example, setting the option as `showLineNumbers: ['typescript']` will display line numbers only for code blocks with the language `typescript`, while other languages (e.g., `text`) will not display line numbers.
+
+**Note**: When this option is used, the plugin may assign a language class incorrectly (e.g., `language-{1,3}`, `language-showLineNumbers`, or `language-{specifiedLanguage}`). One possible approach to mitigate this is to add a placeholder like `unknown` so that the resulting `div` will have a class such as `language-unknown`.
 
 [rehype]: https://github.com/wooorm/rehype
 [prism]: http://prismjs.com/
