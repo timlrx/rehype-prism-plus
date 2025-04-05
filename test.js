@@ -244,6 +244,40 @@ test('not show line number when showLineNumbers=false', async () => {
   assert.not(result.match(/line="2"/g))
 })
 
+test('show line numbers when showLineNumbers=string[] includes target language', async () => {
+  const result = processHtml(
+    dedent`
+    <div>
+      <pre>
+      <code class="language-typescript code-highlight">x = 6
+      y = 7
+      </code>
+      </pre>
+    </div>
+    `,
+    { showLineNumbers: ['typescript', 'py'] }
+  ).trim()
+  assert.ok(result.match(/line="1"/g))
+  assert.ok(result.match(/line="2"/g))
+})
+
+test('not show line numbers when showLineNumbers=string[] does not include target language', async () => {
+  const result = processHtml(
+    dedent`
+    <div>
+      <pre>
+      <code class="language-javascript code-highlight">x = 6
+      y = 7
+      </code>
+      </pre>
+    </div>
+    `,
+    { showLineNumbers: ['typescript', 'py'] }
+  ).trim()
+  assert.not(result.match(/line="1"/g))
+  assert.not(result.match(/line="2"/g))
+})
+
 test('not show line number when showLineNumbers={false}', async () => {
   const meta = 'showLineNumbers={false}'
   const result = processHtml(

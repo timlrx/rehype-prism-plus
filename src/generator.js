@@ -3,7 +3,7 @@
  * @typedef {import('hast').Root} Root
  * @typedef Options options
  *   Configuration.
- * @property {boolean} [showLineNumbers]
+ * @property {boolean|string[]} [showLineNumbers]
  *   Set `showLineNumbers` to `true` to always display line number
  * @property {boolean} [ignoreMissing]
  *   Set `ignoreMissing` to `true` to ignore unsupported languages and line highlighting when no language is specified
@@ -276,11 +276,14 @@ const rehypePrismGenerator = (refractor) => {
         line.children = treeExtract.children
 
         // Line number
-        if (
+        const isShowNumbers =
           (meta.toLowerCase().includes('showLineNumbers'.toLowerCase()) ||
-            options.showLineNumbers) &&
+            options.showLineNumbers === true ||
+            (typeof options.showLineNumbers === 'object' &&
+              options.showLineNumbers.includes(lang))) &&
           !falseShowLineNumbersStr.some((str) => meta.toLowerCase().includes(str))
-        ) {
+
+        if (isShowNumbers) {
           line.properties.line = [(i + startingLineNumber).toString()]
           line.properties.className.push('line-number')
         }
