@@ -1,4 +1,4 @@
-import { refractor as refractorAll } from 'refractor/lib/all.js'
+import { refractor as refractorAll } from 'refractor/all'
 import rehypePrismGenerator from './generator.js'
 
 /**
