@@ -29,7 +29,7 @@ const getLanguage = (node) => {
 }
 
 /**
- * @param {import('refractor/lib/core').Refractor} refractor
+ * @param {import('refractor/core').Refractor} refractor
  * @param {string} defaultLanguage
  * @return {void}
  */
@@ -167,7 +167,7 @@ const addNodePositionClosure = () => {
  * Pass in your own refractor object with the required languages registered:
  * https://github.com/wooorm/refractor#refractorregistersyntax
  *
- * @param {import('refractor/lib/core').Refractor} refractor
+ * @param {import('refractor/core').Refractor} refractor
  * @return {import('unified').Plugin<[Options?], Root>}
  */
 const rehypePrismGenerator = (refractor) => {
